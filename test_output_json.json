@@ -1,0 +1,115 @@
+{
+    "type": "translation_unit",
+    "children": [
+        {
+            "type": "function_definition",
+            "children": [
+                {
+                    "type": "primitive_type",
+                    "children": [],
+                    "field": "type"
+                },
+                {
+                    "type": "pointer_declarator",
+                    "children": [
+                        {
+                            "type": "*",
+                            "children": []
+                        },
+                        {
+                            "type": "function_declarator",
+                            "children": [
+                                {
+                                    "type": "identifier",
+                                    "children": [],
+                                    "field": "declarator"
+                                },
+                                {
+                                    "type": "parameter_list",
+                                    "children": [
+                                        {
+                                            "type": "(",
+                                            "children": []
+                                        },
+                                        {
+                                            "type": "parameter_declaration",
+                                            "children": [
+                                                {
+                                                    "type": "primitive_type",
+                                                    "children": [],
+                                                    "field": "type"
+                                                },
+                                                {
+                                                    "type": "identifier",
+                                                    "children": [],
+                                                    "field": "declarator"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": ",",
+                                            "children": []
+                                        },
+                                        {
+                                            "type": "parameter_declaration",
+                                            "children": [
+                                                {
+                                                    "type": "primitive_type",
+                                                    "children": [],
+                                                    "field": "type"
+                                                },
+                                                {
+                                                    "type": "identifier",
+                                                    "children": [],
+                                                    "field": "declarator"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": ")",
+                                            "children": []
+                                        }
+                                    ],
+                                    "field": "parameters"
+                                }
+                            ],
+                            "field": "declarator"
+                        }
+                    ],
+                    "field": "declarator"
+                },
+                {
+                    "type": "compound_statement",
+                    "children": [
+                        {
+                            "type": "{",
+                            "children": []
+                        },
+                        {
+                            "type": "return_statement",
+                            "children": [
+                                {
+                                    "type": "return",
+                                    "children": []
+                                },
+                                {
+                                    "type": "number_literal",
+                                    "children": []
+                                },
+                                {
+                                    "type": ";",
+                                    "children": []
+                                }
+                            ]
+                        },
+                        {
+                            "type": "}",
+                            "children": []
+                        }
+                    ],
+                    "field": "body"
+                }
+            ]
+        }
+    ]
+}
