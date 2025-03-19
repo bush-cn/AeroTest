@@ -12,6 +12,6 @@ LANGUAGE_TO_SUFFIX = {
     LanguageEnum.PYTHON: ("py",),
     LanguageEnum.JAVA: ("java",),
     LanguageEnum.CPP: ("cpp", "cc", "hpp"),
-    LanguageEnum.C: ("c", "h"),  # 加上了c和cc
+    LanguageEnum.C: ("c", "h"),
     LanguageEnum.GO: ("go",),
 }

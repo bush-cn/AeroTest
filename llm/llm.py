@@ -5,6 +5,10 @@ class LLM(ABC):
     def __init__(self):
         pass
 
+    @abstractmethod
+    def chat(self, system_prompt, user_input, model=None, max_tokens=4096, temperature=0, stream=True):
+        pass
+
     def calculate_tokens(self, messages, model):
         tokenizer = tiktoken.get_encoding("cl100k_base")  # This is an example; replace with the actual encoding used by your model
         total_tokens = 0

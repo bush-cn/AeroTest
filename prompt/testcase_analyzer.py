@@ -1,185 +1,89 @@
+# TODO: 感觉可以不用LLM，直接匹配字符串？LLM的额外作用可能是能提供用例的解释
 Prompt_C = """
 ## Task 
-You are a testing expert and program analysis specialist. Your task is to analyze the provided test cases (C language) and identify the corresponding structs and functions involved in these test cases. 
-You should only find the relevant structs from the list of structs provided to you. 
+You are a testing expert and program analysis specialist. Your task is to analyze the provided test cases (C language) and identify the corresponding functions involved in these test cases. 
+You should only find the relevant functions from the list of functions provided to you, which are in a format of "[<return type>]<function name>(<type of param 1>, <type of param 2>, ...)" (e.g. [int]add(int, char *)).
+Functions not appearing in the function list should be ignored!
+The input test cases are extracted as functions from the original code, so there may be some functions that are not actual test cases (main function or inital function). Please indicate if a test case is not a real test code in the description and leave the functions field empty.
+
 
 ## Response Format
 Please return the analysis results in the following JSON format:
 ```json
 {
     "test_case_name": "Name of the test case(need to be the same as the original code)",
-    "description": "Brief description of the test case",
-    "classes": [
+    "description": "Brief description of the test case. If the given test case is obviously not a test code, indicate it in the description.",
+    "functions": [
         {
-            "class_name": "Class name",
-            "class_description": "The role or function of this class in the test case",
-            "methods": [
-                {
-                    "method_name": "Method name",
-                    "method_description": "The role or operation of this method in the test case"
-                },
-                ...
-            ]
+            "signature": "Function signature(need to be the same as the input)",
+            "function_description": "The role of this function in the test case",
         },
         ...
     ],
-    "independent_methods": [
-        {
-            "method_name": "Method name",
-            "method_description": "The role or operation of this method in the test case"
-        },
-        ...
-    ]
 }
 ```
 
 ## Examples
-### Input
+### Input1
 ```
-Here are all class: AAABBB, Application, UserRestClient, UserController, RunNotFoundException, RunController, JdbcRunRepository, RunJsonDataLoader, InMemoryRunRepository.
+Here are all functions: [void]adc_enable_channel(uint32_t), [void]adc_disable_channel(uint32_t)
 This is the testcase:
-    def test_update_run(self):
-        s = Solution()
-        repository.update(Run(1,
-                "Monday Morning Run",
-                datetime.now(),
-                datetime.now() + timedelta(minutes=30),
-                5,
-                Location.OUTDOOR), 1)
-        s.assertEqual("Monday Morning Run", repository.find_by_id(1).title)
-        run = repository.find_by_id(1)
-        self.assertEqual("Monday Morning Run", run.title)
-        self.assertEqual(5, run.miles)
-        self.assertEqual(Location.OUTDOOR, run.location)
-These are all the references in the same file that are involved in the test case:[{'repository': 'JdbcRunRepository'}]
-```
-
-### Output
-```json
-{
-    "test_case_name": "test_update_run",
-    "description": "Tests the functionality of updating a run in the repository and verifying the updated details.",
-    "classes": [
-        {
-            "class_name": "JdbcRunRepository",
-            "class_description": "Class responsible for managing the persistence of Run objects using JDBC.",
-            "methods": [
-                {
-                    "method_name": "update",
-                    "method_description": "Updates an existing Run object in the repository."
-                },
-                {
-                    "method_name": "find_by_id",
-                    "method_description": "Retrieves a Run object from the repository by its ID."
-                }
-            ]
-        }
-    ],
-    "independent_methods": []
-}
-```
-### Explanation
-The testcase `test_update_run` contains several classes, but only the `repository`, which is of type `JdbcRunRepository`, appears in the provided class list. 
-Therefore, only the `JdbcRunRepository` class is returned.
-
-## Important Notes
-- You should only find the relevant classes from the list of classes provided to you. Classes not appearing in the class list should be ignored!
-- Ensure that all involved classes and methods are accurately identified, avoiding any duplication or omission.
-- For methods that belong to a class, provide detailed descriptions of each class and method's role or operation in the test case.
-- For independent methods that do not belong to any class, also provide detailed descriptions of their roles in the test case.
-- Only return the JSON-formatted data without adding any extra content.
-- The results must be based on actual analysis; do not fabricate information.
-"""
-
-Prompt_Java = """
-## Task
-You are a testing expert and program analysis specialist. Your task is to analyze the provided test cases and identify the corresponding classes and methods involved in these test cases. 
-You should only find the relevant classes from the list of classes provided to you. Classes not appearing in the class list should be ignored!
-
-## Response Format
-Please return the analysis results in the following JSON format:
-```json
-{
-    "test_case_name": "Name of the test case(need to be the same as the original code)",
-    "description": "Brief description of the test case",
-    "classes": [
-        {
-            "class_name": "Class name",
-            "class_description": "The role or function of this class in the test case",
-            "methods": [
-                {
-                    "method_name": "Method name",
-                    "method_description": "The role or operation of this method in the test case"
-                },
-                ...
-            ]
-        },
-        ...
-    ],
-    "independent_methods": [
-        {
-            "method_name": "Method name",
-            "method_description": "The role or operation of this method in the test case"
-        },
-        ...
-    ]
-}
-```
-
-## Examples
-### Input
-```
-Here are all class: AAABBB, Application, UserRestClient, UserController, RunNotFoundException, RunController, JdbcRunRepository, RunJsonDataLoader, InMemoryRunRepository.
-This is the testcase:
-    @Test
-    void shouldUpdateRun() {
-        repository.update(new Run(1,
-                "Monday Morning Run",
-                LocalDateTime.now(),
-                LocalDateTime.now().plus(30, ChronoUnit.MINUTES),
-                5,
-                Location.OUTDOOR), 1);
-        var run = repository.findById(1).get();
-        assertEquals("Monday Morning Run", run.title());
-        assertEquals(5, run.miles());
-        assertEquals(Location.OUTDOOR, run.location());
+    /*
+     * Checking that an ADC channel is enabled.
+     */
+    void test_adc_channel_enabled(void) {
+        uint8_t channel = ADC_CHANNEL_0;
+    
+        // Check if that channel is disabled
+        TEST_ASSERT_FALSE(ADC->ADC_CHSR & (0x1u << channel));
+    
+        adc_enable_channel(channel);
+    
+        // Check if that channel is enabled
+        TEST_ASSERT_TRUE(ADC->ADC_CHSR & (0x1u << channel));
     }
-These are all the references in the same file that are involved in the test case:[{'repository': 'JdbcRunRepository'}]
-The following are all the definitions of the referenced record:[{'Run': [{'name': 'id', 'type': 'Integer'}, {'name': 'title', 'type': 'String'}, {'name': 'startedOn', 'type': 'LocalDateTime'}, {'name': 'completedOn', 'type': 'LocalDateTime'}, {'name': 'miles', 'type': 'Integer'}, {'name': 'location', 'type': 'Location'}]}]
 ```
-### Output
+
+### Output1
 ```json
 {
-    "test_case_name": "shouldUpdateRun",
-    "description": "Tests the functionality of updating a run in the repository and verifying the updated details.",
-    "classes": [
+    "test_case_name": "test_adc_channel_enabled",
+    "description": "Checking that an ADC channel is enabled.",
+    "functions": [
         {
-            "class_name": "JdbcRunRepository",
-            "class_description": "Class responsible for managing the persistence of Run objects using JDBC.",
-            "methods": [
-                {
-                    "method_name": "update",
-                    "method_description": "Updates an existing Run object in the repository."
-                },
-                {
-                    "method_name": "findById",
-                    "method_description": "Retrieves a Run object from the repository by its ID."
-                }
-            ]
-        }
+            "signature": "[void]adc_enable_channel(uint32_t)",
+            "function_description": "Enables the specified ADC channel.",
+        },
     ],
-    "independent_methods": []
+}
+
+### Input2
+```
+Here are all functions: [void]adc_enable_channel(uint32_t), [void]adc_disable_channel(uint32_t)
+This is the testcase:
+    int main(void) {
+    // basic initialization of hardware and UART communication.
+    unity_hw_setup();
+
+    // run unit tests
+    run_tests();
+    }
+```
+
+### Output2
+```json
+{
+    "test_case_name": "main",
+    "description": "This is not a test code.",
+    "functions": [],
 }
 ```
-### Explanation
-The testcase `shouldUpdateRun` contains several classes, but only the `repository`, which is of type `JdbcRunRepository`, appears in the provided class list. 
-Therefore, only the `JdbcRunRepository` class is returned.
 
 ## Important Notes
-- You should only find the relevant classes from the list of classes provided to you. Classes not appearing in the class list should be ignored!
-- Ensure that all involved classes and methods are accurately identified, avoiding any duplication or omission.
-- For methods that belong to a class, provide detailed descriptions of each class and method's role or operation in the test case.
-- For independent methods that do not belong to any class, also provide detailed descriptions of their roles in the test case.
+- You should only find the relevant functions from the list of functions provided to you. Functions not appearing in the function list should be ignored!
+- Ensure that all involved functions are accurately identified, avoiding any duplication or omission.
+- For functions that involved in the test case, provide detailed descriptions of each of their role or operation in the test case.
+- You should identify the non-test code, indicate it in the description and leave the functions field empty.
 - Only return the JSON-formatted data without adding any extra content.
 - The results must be based on actual analysis; do not fabricate information.
 """

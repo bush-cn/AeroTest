@@ -15,7 +15,7 @@ class Analyzer(ABC, MetaInfo):
         self.token_threshold = 4096  # 设置 token 阈值
 
     @abstractmethod
-    def excute(self):
+    def execute(self):
         """
         执行具体的分析操作。
         子类应该实现具体的分析逻辑。

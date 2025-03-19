@@ -1,30 +1,24 @@
 LANGUAGE_MODE = "cpp"
 
 LOG_DIR = r"D:\Code\UnitTestGen\logs"
+LLM_LOG_DIR = LOG_DIR + r"\llm_logs"
 
-REPO_PATH = r"D:\Code\UnitTestGen\fzy"
+REPO_PATH = r"D:\Code\UnitTestGen\mahm3lib"
 CUSTOMIZED_TESTCODE_PATH = [
     r"test"
 ]   # relative path
 EXCEPTE_PATH = [
-    r"D:\Code\UnitTestGen\fzy\deps"
+    r"D:\Code\UnitTestGen\mahm3lib\src\unity"
 ]
-RESOLVED_METAINFO_PATH = r"D:\Code\UnitTestGen\data\\"
+RESOLVED_METAINFO_PATH = "D:\\Code\\UnitTestGen\\data\\"
 ALL_METAINFO_PATH = r"D:\Code\UnitTestGen\data\all_metainfo.json"
 
-CLASS_METAINFO_PATH = RESOLVED_METAINFO_PATH + "class_metainfo.json"
-METHOD_METAINFO_PATH = RESOLVED_METAINFO_PATH + "method_metainfo.json"
 TESTCASE_METAINFO_PATH = RESOLVED_METAINFO_PATH + "testcase_metainfo.json"
-TESTCLASS_METAINFO_PATH = RESOLVED_METAINFO_PATH + "testclass_metainfo.json"
-FILE_IMPORTS_PATH = RESOLVED_METAINFO_PATH + "file_imports.json"
-PACKAGES_METAINFO_PATH = RESOLVED_METAINFO_PATH + "packages_metainfo.json"
-FILE_METAINFO_PATH = RESOLVED_METAINFO_PATH + "file_metainfo.json"
-TESTFILE_METAINFO_PATH = RESOLVED_METAINFO_PATH + "testfile_metainfo.json"
-ABSTRACTCLASS_METAINFO_PATH = RESOLVED_METAINFO_PATH + "abstractclass_metainfo.json"
-JUNIT_VERSION_PATH = RESOLVED_METAINFO_PATH + "junit_version.json"
 # 新增
 FUNCTION_METAINFO_PATH = RESOLVED_METAINFO_PATH + "function_metainfo.json"
 STRUCT_METAINFO_PATH = RESOLVED_METAINFO_PATH + "struct_metainfo.json"
+
+FUNCTION_SIMILARITY_PATH = RESOLVED_METAINFO_PATH + "function_similarity.json"
 
 CLASS_PROPERTY_PATH = RESOLVED_METAINFO_PATH + "class_property.json"
 CLASS_PROPERTY_DIR = RESOLVED_METAINFO_PATH + "class_property/"

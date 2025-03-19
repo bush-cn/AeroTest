@@ -8,7 +8,6 @@ from config import (
     RESOLVED_METAINFO_PATH,
     FUNCTION_METAINFO_PATH,
     STRUCT_METAINFO_PATH,
-    FILE_IMPORTS_PATH,
     TESTCASE_METAINFO_PATH,
     CUSTOMIZED_TESTCODE_PATH
 )
@@ -54,13 +53,13 @@ class CMetaInfoBuilder():
         }
         self.save_metainfo(path_to_data)
 
-    def resolve_file_imports(self, file_imports_path=FILE_IMPORTS_PATH):
-        file_imports = {}
-        for file in self.metainfo:
-            file_imports[file['relative_path']] = file['contexts']
-
-        save_json(file_imports_path, file_imports)
-        logger.info(f"Saved file imports to {file_imports_path}")
+    # def resolve_file_imports(self, file_imports_path=FILE_IMPORTS_PATH):
+    #     file_imports = {}
+    #     for file in self.metainfo:
+    #         file_imports[file['relative_path']] = file['contexts']
+    #
+    #     save_json(file_imports_path, file_imports)
+    #     logger.info(f"Saved file imports to {file_imports_path}")
 
     def get_standard_function_name(self, function: Function):
         return f'[{function.return_type}]' + function.name + \

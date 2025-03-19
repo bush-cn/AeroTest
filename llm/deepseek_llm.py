@@ -11,6 +11,7 @@ DEEPSEEK_MODEL = "deepseek-v3-241226"
 
 class DeepSeekLLM(LLM):
     def __init__(self, api_key=None, api_base="https://ark.cn-beijing.volces.com/api/v3"):
+        super().__init__()
         if api_key is None:
             api_key = os.getenv("DEEPSEEK_API_KEY")
         self.client = OpenAI(

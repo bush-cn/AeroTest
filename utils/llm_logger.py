@@ -5,7 +5,8 @@ raw intput to LLM and the output from LLM, helping us to debug and analyze.
 import os
 import datetime
 import threading
-from apt.config.config import LLM_LOG_DIR
+from config import LLM_LOG_DIR
+
 
 class SingletonMeta(type):
     _instances = {}
@@ -17,6 +18,7 @@ class SingletonMeta(type):
                 instance = super().__call__(*args, **kwargs)
                 cls._instances[cls] = instance
         return cls._instances[cls]
+
 
 class LLMLogger(metaclass=SingletonMeta):
     def __init__(self, log_dir):
@@ -38,5 +40,6 @@ class LLMLogger(metaclass=SingletonMeta):
         with open(log_file_path, "a") as log_file:
             log_file.write(f"--- LLM Response ({datetime.datetime.now()}): ---\n")
             log_file.write(response + "\n\n")
+
 
 llm_logger = LLMLogger(log_dir=LLM_LOG_DIR)
