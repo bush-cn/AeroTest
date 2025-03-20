@@ -7,10 +7,11 @@ from llm.llm import LLM
 # Load environment variables from .env file
 load_dotenv()
 
-DEEPSEEK_MODEL = "deepseek-v3-241226"
+# DEEPSEEK_MODEL = "deepseek-v3-241226"
+DEEPSEEK_MODEL = "deepseek-v3"
 
 class DeepSeekLLM(LLM):
-    def __init__(self, api_key=None, api_base="https://ark.cn-beijing.volces.com/api/v3"):
+    def __init__(self, api_key=None, api_base="https://dashscope.aliyuncs.com/compatible-mode/v1"): # https://ark.cn-beijing.volces.com/api/v3
         super().__init__()
         if api_key is None:
             api_key = os.getenv("DEEPSEEK_API_KEY")
