@@ -42,6 +42,7 @@ class Analyzer(ABC, MetaInfo):
             return resp
         except Exception as e:
             logger.exception(f'Error while extract json from LLM raw output: {e}')
+            logger.warn(f'Full response without correct JSON format: {full_response}')
             return {}
 
     def extract_code(self, full_response):

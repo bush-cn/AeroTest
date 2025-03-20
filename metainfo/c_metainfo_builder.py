@@ -99,31 +99,6 @@ class CMetaInfoBuilder():
                 )
                 self.structs.append(_struct)
 
-            for function in file['methods']:
-                _function = Function(
-                    uris=FunctionSignature(
-                        file_path=file_path,
-                        function_name=function['name'],
-                        params=function['parameters'],
-                        return_type=function['attributes']['return_type'],
-                    ).unique_name(),
-                    name=function['name'],
-                    arg_nums=len(function['parameters']),
-                    params=function['parameters'],
-                    signature=get_java_standard_method_name(
-                        function['name'],
-                        function['parameters'],
-                        function['attributes']['return_type']
-                    ),
-                    original_string=function['original_string'],
-                    default_arguments=None, # C has no default arguments
-                    file=file_path,
-                    attributes=function['attributes'],
-                    docstring=function['docstring'],
-                    return_type=function['attributes']['return_type'],
-                )
-                self.functions.append(_function)
-
             if self.is_testcase(file):
                 for function in file['methods']:
                     _testcase = CTestcase(
@@ -149,3 +124,30 @@ class CMetaInfoBuilder():
                         return_type=function['attributes']['return_type'],
                     )
                     self.testcases.append(_testcase)
+            else:
+                for function in file['methods']:
+                    _function = Function(
+                        uris=FunctionSignature(
+                            file_path=file_path,
+                            function_name=function['name'],
+                            params=function['parameters'],
+                            return_type=function['attributes']['return_type'],
+                        ).unique_name(),
+                        name=function['name'],
+                        arg_nums=len(function['parameters']),
+                        params=function['parameters'],
+                        signature=get_java_standard_method_name(
+                            function['name'],
+                            function['parameters'],
+                            function['attributes']['return_type']
+                        ),
+                        original_string=function['original_string'],
+                        default_arguments=None, # C has no default arguments
+                        file=file_path,
+                        attributes=function['attributes'],
+                        docstring=function['docstring'],
+                        return_type=function['attributes']['return_type'],
+                    )
+                    self.functions.append(_function)
+
+

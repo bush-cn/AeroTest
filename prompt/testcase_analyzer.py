@@ -4,22 +4,21 @@ Prompt_C = """
 You are a testing expert and program analysis specialist. Your task is to analyze the provided test cases (C language) and identify the corresponding functions involved in these test cases. 
 You should only find the relevant functions from the list of functions provided to you, which are in a format of "[<return type>]<function name>(<type of param 1>, <type of param 2>, ...)" (e.g. [int]add(int, char *)).
 Functions not appearing in the function list should be ignored!
-The input test cases are extracted as functions from the original code, so there may be some functions that are not actual test cases (main function or inital function). Please indicate if a test case is not a real test code in the description and leave the functions field empty.
+The input test cases are extracted as functions from the original code, so there may be some functions that are not actual test cases (main function or inital function). Please indicate if a test case is not a real test code in the description and leave out the functions field.
 
 
 ## Response Format
 Please return the analysis results in the following JSON format:
 ```json
 {
-    "test_case_name": "Name of the test case(need to be the same as the original code)",
     "description": "Brief description of the test case. If the given test case is obviously not a test code, indicate it in the description.",
     "functions": [
         {
             "signature": "Function signature(need to be the same as the input)",
-            "function_description": "The role of this function in the test case",
+            "function_description": "The role of this function in the test case"
         },
         ...
-    ],
+    ]
 }
 ```
 
@@ -47,19 +46,18 @@ This is the testcase:
 ### Output1
 ```json
 {
-    "test_case_name": "test_adc_channel_enabled",
     "description": "Checking that an ADC channel is enabled.",
     "functions": [
         {
             "signature": "[void]adc_enable_channel(uint32_t)",
-            "function_description": "Enables the specified ADC channel.",
-        },
-    ],
+            "function_description": "Enables the specified ADC channel."
+        }
+    ]
 }
 
 ### Input2
 ```
-Here are all functions: [void]adc_enable_channel(uint32_t), [void]adc_disable_channel(uint32_t)
+Here are all functions: [void]unity_hw_setup(), [void]run_tests()
 This is the testcase:
     int main(void) {
     // basic initialization of hardware and UART communication.
@@ -73,9 +71,7 @@ This is the testcase:
 ### Output2
 ```json
 {
-    "test_case_name": "main",
-    "description": "This is not a test code.",
-    "functions": [],
+    "description": "This is not a test code."
 }
 ```
 
@@ -83,7 +79,7 @@ This is the testcase:
 - You should only find the relevant functions from the list of functions provided to you. Functions not appearing in the function list should be ignored!
 - Ensure that all involved functions are accurately identified, avoiding any duplication or omission.
 - For functions that involved in the test case, provide detailed descriptions of each of their role or operation in the test case.
-- You should identify the non-test code, indicate it in the description and leave the functions field empty.
-- Only return the JSON-formatted data without adding any extra content.
+- You should identify the non-test code, indicate it in the description and leave out the functions field. DO NOT contain any functions in the output if it is non-test code.
+- Only return the JSON-formatted data without adding any extra content or any redundant commas.
 - The results must be based on actual analysis; do not fabricate information.
 """

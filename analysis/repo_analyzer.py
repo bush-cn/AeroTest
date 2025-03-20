@@ -82,3 +82,17 @@ class RepoAnalyzer(Analyzer):
                 file_path=self.function_similarity_path,
                 data=best_sim)
             logger.info(f"{n} functions' similarity analyzed")
+
+    def analyze_function_similarity(self, function_uri: str):
+        best_sim = {'ts_score': -1.0, 'other_function': None}
+        function = self.get_function(function_uri)
+        tree_1, len_1 = self.parse_ast(function['original_string'])
+        # 预先缓存每个函数的 AST 和树长度
+        ast_cache = {}
+        for func in self.function_metainfo:
+            tree_2, len_2 = self.parse_ast(func['original_string'])
+            ts_score = self.calculate_ast_similarity(tree_1, tree_2, len_1, len_2)
+            if ts_score > best_sim['ts_score']:
+                best_sim['ts_score'] = ts_score
+                best_sim['other_function'] = func['name']
+        return best_sim
