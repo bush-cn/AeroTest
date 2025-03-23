@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 from source_parser.parsers.language_parser import (
     LanguageParser,
     has_correct_syntax,
@@ -15,7 +15,12 @@ class CParser(LanguageParser):
     其中将结构体（struct）当作类处理，函数当作方法。
     """
     _function_types = ("function_definition",)
-    _struct_types = ("struct_specifier",)
+    _user_defined_types = (
+        "struct_specifier",
+        "enum_specifier",
+        "union_specifier",
+        "type_definition",
+    )
     _import_types = (
         "preproc_include",
         "preproc_def",
@@ -54,15 +59,15 @@ class CParser(LanguageParser):
     @property
     def class_nodes(self):
         """
-        返回所有结构体定义节点（将结构体当作类处理）。
-        只保留那些含有 body 的节点，以过滤掉仅作为类型引用出现的 struct。
+        返回所有用户定义类型（UDTs）节点
         """
         nodes = []
         try:
             all_nodes = []
-            traverse_type(self.tree.root_node, all_nodes, self._struct_types)
+            traverse_type(self.tree.root_node, all_nodes, self._user_defined_types)
             # 过滤掉没有 body 的节点
-            nodes = [node for node in all_nodes if node.child_by_field_name("body") is not None]
+            nodes = [node for node in all_nodes
+                     if node.type == "type_definition" or node.child_by_field_name("body") is not None]
         except RecursionError:
             pass
         return nodes
@@ -104,15 +109,15 @@ class CParser(LanguageParser):
         """解析函数定义节点，返回函数的结构化信息"""
         result = {
             "original_string": self.span_select(function_node, indent=False),
-            "byte_span": (function_node.start_byte, function_node.end_byte),
-            "start_point": (
-                self.starting_point + function_node.start_point[0],
-                function_node.start_point[1]
-            ),
-            "end_point": (
-                self.starting_point + function_node.end_point[0],
-                function_node.end_point[1]
-            ),
+            # "byte_span": (function_node.start_byte, function_node.end_byte),
+            # "start_point": (
+            #     self.starting_point + function_node.start_point[0],
+            #     function_node.start_point[1]
+            # ),
+            # "end_point": (
+            #     self.starting_point + function_node.end_point[0],
+            #     function_node.end_point[1]
+            # ),
             "signature": self._get_signature(function_node),
             "attributes": {
                 "annotations": []
@@ -168,96 +173,109 @@ class CParser(LanguageParser):
                     # param_type = param_text[:offset_start] + param_text[offset_end:]
                     # 或者直接将字符串末尾的标识符去掉？
                     param_type = param_text[:param_text.rfind(param_name)].strip()
-                    try:
-                        syntax_ok = has_correct_syntax(param)
-                    except RecursionError:
-                        syntax_ok = False
                     params.append({
                         "original_string": param_text,
                         "type": param_type,
-                        "name": param_name,
-                        "syntax_pass": syntax_ok
+                        "name": param_name
                     })
         result["parameters"] = params
-        try:
-            result["syntax_pass"] = has_correct_syntax(function_node)
-        except RecursionError:
-            result["syntax_pass"] = False
+        # try:
+        #     result["syntax_pass"] = has_correct_syntax(function_node)
+        # except RecursionError:
+        #     result["syntax_pass"] = False
         return result
 
-    def _parse_struct_node(self, struct_node):
+    def _parse_udt_node(self, udt_node):
         """
-        解析结构体节点，返回结构体的结构化信息，
-        包括字段列表以及可能的嵌套结构体。
+        解析用户定义类型（UDT）节点，返回结构化信息。
+        name字段是后续检索的键，如 struct s, union u, typedef_t（TODO: 加速检索？）
+        若为 typedef，新增typedef字段，指向所定义的类型源字符串，如struct s, int
         """
         result = {
-            "original_string": self.span_select(struct_node, indent=False),
-            "byte_span": (struct_node.start_byte, struct_node.end_byte),
-            "start_point": (
-                self.starting_point + struct_node.start_point[0],
-                struct_node.start_point[1]
-            ),
-            "end_point": (
-                self.starting_point + struct_node.end_point[0],
-                struct_node.end_point[1]
-            ),
-            "attributes": {
-                "annotations": [],
-                "fields": []
-            }
+            "original_string": self.span_select(udt_node, indent=False),
+            # "byte_span": (udt_node.start_byte, udt_node.end_byte),
+            # "start_point": (
+            #     self.starting_point + udt_node.start_point[0],
+            #     udt_node.start_point[1]
+            # ),
+            # "end_point": (
+            #     self.starting_point + udt_node.end_point[0],
+            #     udt_node.end_point[1]
+            # ),
+            # "attributes": {
+            #     "annotations": [],
+            #     "fields": []
+            # }
         }
-        comment_node = self._get_docstring_before(struct_node)
+        comment_node = self._get_docstring_before(udt_node)
         result["docstring"] = (
             strip_c_style_comment_delimiters(self.span_select(comment_node, indent=False)).strip()
             if comment_node else ""
         )
-        name_node = struct_node.child_by_field_name("name")
-        result["name"] = self.span_select(name_node, indent=False) if name_node else ""
-        body_node = struct_node.child_by_field_name("body")
-        result["body"] = self.span_select(body_node, indent=False) if body_node else ""
-        fields = []
-        if body_node and body_node.children:
-            for field in body_node.children:
-                if field.type != "field_declaration":
-                    continue
-                field_dict = {
-                    "original_string": self.span_select(field, indent=False),
-                    "annotations": []
-                }
-                comment_node = self._get_docstring_before(field, body_node)
-                field_dict["docstring"] = (
-                    strip_c_style_comment_delimiters(self.span_select(comment_node, indent=False)).strip()
-                    if comment_node else ""
-                )
-                # TODO:是否也需要处理指针类型的字段？
-                type_node = field.child_by_field_name("type")
-                field_dict["type"] = self.span_select(type_node, indent=False) if type_node else ""
-                if field.children and field.children[0].type == "storage_class_specifier":
-                    field_dict["annotations"].append(self.span_select(field.children[0], indent=False))
-                try:
-                    field_dict["syntax_pass"] = has_correct_syntax(field)
-                except RecursionError:
-                    field_dict["syntax_pass"] = False
-                fields.append(field_dict)
-            result["attributes"]["fields"] = fields
-        try:
-            result["syntax_pass"] = has_correct_syntax(struct_node)
-        except RecursionError:
-            result["syntax_pass"] = False
-        # 解析嵌套的结构体（如果有）
-        nested_structs = []
-        if body_node:
-            for child in body_node.children:
-                if child.type in self._struct_types:
-                    nested_structs.append(self._parse_struct_node(child))
-        result["structs"] = nested_structs
+        # 处理typedef
+        if udt_node.type == "type_definition":
+            typedef_name_node = udt_node.child_by_field_name("declarator")
+            result['name'] = self.span_select(typedef_name_node, indent=False) if typedef_name_node else ""
+            typedef_original_type_node = udt_node.child_by_field_name("type")
+            result['typedef'] = self.span_select(typedef_original_type_node, indent=False)\
+                if typedef_original_type_node else ""
+            return result
+
+        name_node = udt_node.child_by_field_name("name")
+        udt_name = self.span_select(name_node, indent=False) if name_node else ""
+        if udt_node.type == "struct_specifier":
+            udt_name = "struct " + udt_name
+        elif udt_node.type == "enum_specifier":
+            udt_name = "enum " + udt_name
+        elif udt_node.type == "union_specifier":
+            udt_name = "union " + udt_name
+        result["name"] = udt_name.strip()
+
+        # 这下面的感觉都不用记录了，直接将源码丢给LLM处理
+        # body_node = udt_node.child_by_field_name("body")
+        # result["body"] = self.span_select(body_node, indent=False) if body_node else ""
+        # fields = []
+        # if body_node and body_node.children:
+        #     for field in body_node.children:
+        #         if field.type != "field_declaration":
+        #             continue
+        #         field_dict = {
+        #             "original_string": self.span_select(field, indent=False),
+        #             "annotations": []
+        #         }
+        #         comment_node = self._get_docstring_before(field, body_node)
+        #         field_dict["docstring"] = (
+        #             strip_c_style_comment_delimiters(self.span_select(comment_node, indent=False)).strip()
+        #             if comment_node else ""
+        #         )
+        #         type_node = field.child_by_field_name("type")
+        #         field_dict["type"] = self.span_select(type_node, indent=False) if type_node else ""
+        #         if field.children and field.children[0].type == "storage_class_specifier":
+        #             field_dict["annotations"].append(self.span_select(field.children[0], indent=False))
+        #         try:
+        #             field_dict["syntax_pass"] = has_correct_syntax(field)
+        #         except RecursionError:
+        #             field_dict["syntax_pass"] = False
+        #         fields.append(field_dict)
+        #     result["attributes"]["fields"] = fields
+        # try:
+        #     result["syntax_pass"] = has_correct_syntax(udt_node)
+        # except RecursionError:
+        #     result["syntax_pass"] = False
+        # # 解析嵌套的结构体（如果有）
+        # nested_structs = []
+        # if body_node:
+        #     for child in body_node.children:
+        #         if child.type in self._struct_types:
+        #             nested_structs.append(self._parse_struct_node(child))
+        # result["structs"] = nested_structs
         return result
 
     # --- 实现抽象方法和属性 ---
     @property
     def class_types(self):
         """将结构体当作类来处理，返回对应的节点类型"""
-        return self._struct_types
+        return self._user_defined_types
 
     @property
     def method_types(self):
@@ -272,7 +290,7 @@ class CParser(LanguageParser):
         return self._include_patterns
 
     def _parse_class_node(self, node, parent_node=None):
-        return self._parse_struct_node(node)
+        return self._parse_udt_node(node)
 
     def _parse_method_node(self, node, parent_node=None):
         return self._parse_function_node(node)

@@ -7,51 +7,55 @@ from config import (
     ALL_METAINFO_PATH,
     RESOLVED_METAINFO_PATH,
     FUNCTION_METAINFO_PATH,
-    STRUCT_METAINFO_PATH,
+    UDT_METAINFO_PATH,
     TESTCASE_METAINFO_PATH,
-    CUSTOMIZED_TESTCODE_PATH
+    GLOBAL_VARIABLE_METAINFO_PATH,
+    CUSTOMIZED_TESTCODE_PATH,
 )
-from metainfo.model import Function, Struct, CTestcase, File, FunctionSignature
+from metainfo.model import Function, UDT, CTestcase, FunctionSignature, GlobalVariable
 
 
-class CMetaInfoBuilder():
-    """
-    for C, method denotes function and class denotes struct,
-    so I didn't use the super class MetaInfoBuilder
-    """
+class CMetaInfoBuilder:
 
     def __init__(self, metainfo_json_path: str = ALL_METAINFO_PATH,
                  resolved_metainfo_path: str = RESOLVED_METAINFO_PATH):
         self.metainfo_json_path = metainfo_json_path
-        self.metainfo = self.load_metainfo()
+        self.metainfo = load_json(self.metainfo_json_path)
         self.resolved_metainfo_path = resolved_metainfo_path
         self.functions: List[Function] = []
-        self.structs: List[Struct] = []
+        self.udts: List[UDT] = []
         self.testcases: List[CTestcase] = []
-        self.files: List[File] = []
+        self.global_variables: List[GlobalVariable] = []
 
-    def load_metainfo(self):
-        with open(self.metainfo_json_path) as f:
-            metainfo = json.load(f)
-
-        return metainfo
-
-    def save_metainfo(self, path_to_data: Dict[str, List[Dict]]):
-        def save_data(file_path, data):
-            save_json(file_path, [item.to_json() for item in data])
-
-        for path, data in path_to_data.items():
-            save_data(path, data)
-
-        logger.info("save metainfo success!")
 
     def save(self):
         path_to_data = {
-            FUNCTION_METAINFO_PATH: self.functions,
-            TESTCASE_METAINFO_PATH: self.testcases,
-            STRUCT_METAINFO_PATH: self.structs,
+            FUNCTION_METAINFO_PATH: self.data_to_dict(self.functions),
+            TESTCASE_METAINFO_PATH: self.data_to_dict(self.testcases),
+            UDT_METAINFO_PATH: self.data_to_dict(self.udts, duplicate=False),
+            GLOBAL_VARIABLE_METAINFO_PATH: self.data_to_dict(self.global_variables)
         }
-        self.save_metainfo(path_to_data)
+
+        for path, data in path_to_data.items():
+            save_json(path, data)
+
+        logger.info("save metainfo success!")
+
+    @staticmethod
+    def data_to_dict(data: List[Function | UDT | CTestcase | GlobalVariable], duplicate=True) -> Dict:
+        # 为了提高查询速度，将列表形式的metainfo转换为字典形式
+        # 因为有可能用static关键字修饰的函数、全局变量可以重名，所以用列表存储（UDT不会重名）
+        if not duplicate:
+            return {item.name: item.to_json() for item in data}
+
+        _dict = {}
+        for item in data:
+            name = item.name
+            if name in _dict:
+                _dict[name].append(item.to_json())  # 如果已存在，追加到列表中
+            else:
+                _dict[name] = [item.to_json()]  # 如果不存在，创建新列表
+        return _dict
 
     # def resolve_file_imports(self, file_imports_path=FILE_IMPORTS_PATH):
     #     file_imports = {}
@@ -61,9 +65,9 @@ class CMetaInfoBuilder():
     #     save_json(file_imports_path, file_imports)
     #     logger.info(f"Saved file imports to {file_imports_path}")
 
-    def get_standard_function_name(self, function: Function):
-        return f'[{function.return_type}]' + function.name + \
-            '(' + ','.join([param['type'] for param in function.params]) + ')'
+    # def get_standard_function_name(self, function: Function):
+    #     return f'[{function.return_type}]' + function.name + \
+    #         '(' + ','.join([param['type'] for param in function.params]) + ')'
 
     @staticmethod
     def is_testcase(file):
@@ -85,19 +89,29 @@ class CMetaInfoBuilder():
                 return True
 
     def build_metainfo(self):
-        for file in self.metainfo:
-            file_path = file['relative_path']
+        for file_path, file in self.metainfo.items():
             #   for C, 'classes' denotes 'structs'
-            for struct in file['classes']:
-                _struct = Struct(
-                    uris=file_path + '.' + struct['name'],
-                    name=struct['name'],
-                    file_path=file_path,
-                    fields=struct['attributes']['fields'],
-                    struct_docstring=struct['docstring'],
-                    original_string=struct['original_string'],
+            for udt in file['classes']:
+                _udt = UDT(
+                    uris=file_path + '.' + udt['name'],
+                    name=udt['name'],
+                    file=file_path,
+                    # fields=struct['attributes']['fields'],
+                    udt_docstring=udt['docstring'],
+                    original_string=udt['original_string'],
+                    typedef=udt['typedef'] if 'typedef' in udt else None,
                 )
-                self.structs.append(_struct)
+                self.udts.append(_udt)
+
+            for global_var in file['global_variables']:
+                _global_var = GlobalVariable(
+                    uris=file_path + '.' + global_var['name'],
+                    name=global_var['name'],
+                    file=file_path,
+                    docstring=global_var['docstring'],
+                    original_string=global_var['original_string'],
+                )
+                self.global_variables.append(_global_var)
 
             if self.is_testcase(file):
                 for function in file['methods']:
@@ -117,7 +131,6 @@ class CMetaInfoBuilder():
                             function['attributes']['return_type']
                         ),
                         original_string=function['original_string'],
-                        default_arguments=None, # C has no default arguments
                         file=file_path,
                         attributes=function['attributes'],
                         docstring=function['docstring'],
@@ -149,5 +162,4 @@ class CMetaInfoBuilder():
                         return_type=function['attributes']['return_type'],
                     )
                     self.functions.append(_function)
-
 

@@ -4,10 +4,10 @@ from parser.source_parse import run_source_parse
 from config import REPO_PATH, ALL_METAINFO_PATH
 from parser.c_parser import CParser
 from metainfo.c_metainfo_builder import CMetaInfoBuilder
-from analysis.repo_analyzer import RepoAnalyzer
-from analysis.testcase_analyzer import TestCaseAnalyzer
-from analysis.context_analyzer import ContextAnalyzer
-from generator.testcase_generator import CTestcaseGenerator
+# from analysis.repo_analyzer import RepoAnalyzer
+# from analysis.testcase_analyzer import TestCaseAnalyzer
+# from analysis.context_analyzer import ContextAnalyzer
+# from generator.testcase_generator import CTestcaseGenerator
 
 if __name__ == "__main__":
     run_source_parse(REPO_PATH, LanguageEnum.C, CParser())
@@ -25,6 +25,6 @@ if __name__ == "__main__":
     # context_analyzer = ContextAnalyzer(llm=llm)
     # context_analyzer.execute()
 
-    generator = CTestcaseGenerator(llm=llm)
-    generator.generate_testcase("src\\sam3x8e\\spi.c.[uint8_t]spi_set_selector_clk_phase(spi_reg_t *,uint8_t,uint32_t)")
-
+    # generator = CTestcaseGenerator(llm=llm)
+    # generator.generate_testcase("src\\sam3x8e\\spi.c.[uint8_t]spi_set_selector_clk_phase(spi_reg_t *,uint8_t,uint32_t)")
+    #

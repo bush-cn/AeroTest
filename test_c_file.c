@@ -1,4 +1,5 @@
-
-int *foo(int a, char b) {
-  return 0;
-}
+/**
+    * @file test_c_file.c
+    * @brief Test file for C files
+    */
+int global_int = 0;

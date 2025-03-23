@@ -43,14 +43,14 @@ def save_json(file_path: str, data: dict | list):
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
         with open(file_path, 'w', encoding='utf-8') as f:
-            json.dump(data, f)
+            json.dump(data, f, ensure_ascii=False)
     except Exception as e:
         logger.exception(f"Error saving json file: {e}")
 
 
 def load_json(file_path: str):
     try:
-        with open(file_path, 'r') as f:
+        with open(file_path, 'r', encoding='utf-8') as f:
             return json.load(f)
     except Exception as e:
         logger.exception(f"Error loading json file: {e}")

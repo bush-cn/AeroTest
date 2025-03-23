@@ -708,33 +708,35 @@ class FunctionSignature:
             '(' + ','.join([param['type'] for param in self.params]) + ')'
 
 
-class Struct:
+class UDT:
     """
-    C语言结构体
+    User Defined Type，用户自定义类型，包括结构体、类、枚举
     """
-
     def __init__(self,
                  uris: List[str] = None,
                  name: str = None,
-                 file_path: str = None,
-                 fields: List[Dict] = None,
-                 struct_docstring: str = None,
-                 original_string: str = None, ):
+                 file: str = None,
+                 # fields: List[Dict] = None,
+                 udt_docstring: str = None,
+                 original_string: str = None,
+                 typedef: str = None):
         self.uris = uris
         self.name = name
-        self.file_path = file_path
-        self.fields = fields
-        self.struct_docstring = struct_docstring
+        self.file = file
+        # self.fields = fields
+        self.udt_docstring = udt_docstring
         self.original_string = original_string
+        self.typedef = typedef
 
     def to_json(self):
         return {
             "uris": self.uris,
             "name": self.name,
-            "file_path": self.file_path,
-            "fields": self.fields,
-            "struct_docstring": self.struct_docstring,
-            "original_string": self.original_string
+            "file": self.file,
+            # "fields": self.fields,
+            "docstring": self.udt_docstring,
+            "original_string": self.original_string,
+            "typedef": self.typedef
         }
 
 class CTestcase(TestCase):
@@ -755,9 +757,7 @@ class CTestcase(TestCase):
                  params: str = None,
                  signature: str = None,
                  original_string: str = None,
-                 default_arguments: Dict[str, str] = None,
                  file: str = None,
-                 class_name: str = None, class_uri: str = None,
                  attributes: Dict[str, List[str]] = None,
                  docstring: str = None,
                  return_type: str = None
@@ -768,10 +768,7 @@ class CTestcase(TestCase):
         self.params = params
         self.signature = signature
         self.original_string = original_string
-        self.default_arguments = default_arguments
         self.file = file
-        self.class_name = class_name
-        self.class_uri = class_uri
         self.attributes = attributes
         self.docstring = docstring
         self.return_type = return_type
@@ -785,10 +782,30 @@ class CTestcase(TestCase):
             "return_type": self.return_type,
             "signature": self.signature,
             "original_string": self.original_string,
-            "default_arguments": self.default_arguments,
             "file": self.file,
-            "class_name": self.class_name,
-            "class_uri": self.class_uri,
             "attributes": self.attributes,
             "docstring": self.docstring,
+        }
+
+class GlobalVariable:
+    def __init__(self,
+                 uris: List[str] = None,
+                 name: str = None,
+                 file: str = None,
+                 docstring: str = None,
+                 original_string: str = None,
+                 ):
+        self.uris = uris
+        self.name = name
+        self.file = file
+        self.docstring = docstring
+        self.original_string = original_string
+
+    def to_json(self):
+        return {
+            "uris": self.uris,
+            "name": self.name,
+            "file": self.file,
+            "docstring": self.docstring,
+            "original_string": self.original_string,
         }
