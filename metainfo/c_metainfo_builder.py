@@ -12,7 +12,7 @@ from config import (
     GLOBAL_VARIABLE_METAINFO_PATH,
     CUSTOMIZED_TESTCODE_PATH,
 )
-from metainfo.model import Function, UDT, CTestcase, FunctionSignature, GlobalVariable
+from metainfo.model import Function, UDT, CTestcase, GlobalVariable
 
 
 class CMetaInfoBuilder:
@@ -32,7 +32,7 @@ class CMetaInfoBuilder:
         path_to_data = {
             FUNCTION_METAINFO_PATH: self.data_to_dict(self.functions),
             TESTCASE_METAINFO_PATH: self.data_to_dict(self.testcases),
-            UDT_METAINFO_PATH: self.data_to_dict(self.udts, duplicate=False),
+            UDT_METAINFO_PATH: self.data_to_dict(self.udts),
             GLOBAL_VARIABLE_METAINFO_PATH: self.data_to_dict(self.global_variables)
         }
 
@@ -42,32 +42,12 @@ class CMetaInfoBuilder:
         logger.info("save metainfo success!")
 
     @staticmethod
-    def data_to_dict(data: List[Function | UDT | CTestcase | GlobalVariable], duplicate=True) -> Dict:
-        # 为了提高查询速度，将列表形式的metainfo转换为字典形式
-        # 因为有可能用static关键字修饰的函数、全局变量可以重名，所以用列表存储（UDT不会重名）
-        if not duplicate:
-            return {item.name: item.to_json() for item in data}
-
+    def data_to_dict(data: List[Function | UDT | CTestcase | GlobalVariable]) -> Dict:
+        # 为了提高查询速度，将列表形式的metainfo转换为字典形式，以uri为key
         _dict = {}
         for item in data:
-            name = item.name
-            if name in _dict:
-                _dict[name].append(item.to_json())  # 如果已存在，追加到列表中
-            else:
-                _dict[name] = [item.to_json()]  # 如果不存在，创建新列表
+            _dict[item.uris] = item.to_json()
         return _dict
-
-    # def resolve_file_imports(self, file_imports_path=FILE_IMPORTS_PATH):
-    #     file_imports = {}
-    #     for file in self.metainfo:
-    #         file_imports[file['relative_path']] = file['contexts']
-    #
-    #     save_json(file_imports_path, file_imports)
-    #     logger.info(f"Saved file imports to {file_imports_path}")
-
-    # def get_standard_function_name(self, function: Function):
-    #     return f'[{function.return_type}]' + function.name + \
-    #         '(' + ','.join([param['type'] for param in function.params]) + ')'
 
     @staticmethod
     def is_testcase(file):
@@ -93,7 +73,7 @@ class CMetaInfoBuilder:
             #   for C, 'classes' denotes 'structs'
             for udt in file['classes']:
                 _udt = UDT(
-                    uris=file_path + '.' + udt['name'],
+                    uris=udt['name'],   # UDT name is unique among all files
                     name=udt['name'],
                     file=file_path,
                     # fields=struct['attributes']['fields'],
@@ -107,6 +87,7 @@ class CMetaInfoBuilder:
                 _global_var = GlobalVariable(
                     uris=file_path + '.' + global_var['name'],
                     name=global_var['name'],
+                    type=global_var['type'],
                     file=file_path,
                     docstring=global_var['docstring'],
                     original_string=global_var['original_string'],
@@ -116,12 +97,7 @@ class CMetaInfoBuilder:
             if self.is_testcase(file):
                 for function in file['methods']:
                     _testcase = CTestcase(
-                        uris=FunctionSignature(
-                            file_path=file_path,
-                            function_name=function['name'],
-                            params=function['parameters'],
-                            return_type=function['attributes']['return_type'],
-                        ).unique_name(),
+                        uris=file_path + '.' + function['name'],
                         name=function['name'],
                         arg_nums=len(function['parameters']),
                         params=function['parameters'],
@@ -140,12 +116,7 @@ class CMetaInfoBuilder:
             else:
                 for function in file['methods']:
                     _function = Function(
-                        uris=FunctionSignature(
-                            file_path=file_path,
-                            function_name=function['name'],
-                            params=function['parameters'],
-                            return_type=function['attributes']['return_type'],
-                        ).unique_name(),
+                        uris=file_path + '.' + function['name'],
                         name=function['name'],
                         arg_nums=len(function['parameters']),
                         params=function['parameters'],

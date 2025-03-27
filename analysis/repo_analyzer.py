@@ -52,30 +52,31 @@ class RepoAnalyzer(Analyzer):
 
         # 初始化每个函数的最佳匹配记录
         best_sim = {}
-        for func in self.function_metainfo:
-            best_sim[func['name']] = {'ts_score': -1.0, 'other_function': None}
+        for uris, func in self.function_metainfo.items():
+            best_sim[uris] = {'ts_score': -1.0, 'similar_function': None}
 
         # 预先缓存每个函数的 AST 和树长度
         ast_cache = {}
-        for func in self.function_metainfo:
-            ast_cache[func['name']] = self.parse_ast(func['original_string'])
+        for uris, func in self.function_metainfo.items():
+            ast_cache[uris] = self.parse_ast(func['original_string'])
 
+        all_functions = [function for function in self.function_metainfo.values()]
         # 只比较每对函数一次（i < j），同时更新两个函数的最佳匹配信息
         for idx_a in range(n):
-            functionA = self.function_metainfo[idx_a]
-            treeA, lenA = ast_cache[functionA['name']]
+            functionA = all_functions[idx_a]
+            treeA, lenA = ast_cache[functionA['uris']]
             for idx_b in range(idx_a + 1, n):
-                functionB = self.function_metainfo[idx_b]
-                treeB, lenB = ast_cache[functionB['name']]
+                functionB = all_functions[idx_b]
+                treeB, lenB = ast_cache[functionB['uris']]
                 ts_score = self.calculate_ast_similarity(treeA, treeB, lenA, lenB)
                 # 更新 functionA 的最佳匹配
-                if ts_score > best_sim[functionA['name']]['ts_score']:
-                    best_sim[functionA['name']]['ts_score'] = ts_score
-                    best_sim[functionA['name']]['other_function'] = functionB['name']
+                if ts_score > best_sim[functionA['uris']]['ts_score']:
+                    best_sim[functionA['uris']]['ts_score'] = ts_score
+                    best_sim[functionA['uris']]['similar_function'] = functionB['uris']
                 # 更新 functionB 的最佳匹配
-                if ts_score > best_sim[functionB['name']]['ts_score']:
-                    best_sim[functionB['name']]['ts_score'] = ts_score
-                    best_sim[functionB['name']]['other_function'] = functionA['name']
+                if ts_score > best_sim[functionB['uris']]['ts_score']:
+                    best_sim[functionB['uris']]['ts_score'] = ts_score
+                    best_sim[functionB['uris']]['similar_function'] = functionA['uris']
                 print(f"Function {idx_a} vs. {idx_b} ts_score: {ts_score}")
         if save:
             save_json(
@@ -83,16 +84,18 @@ class RepoAnalyzer(Analyzer):
                 data=best_sim)
             logger.info(f"{n} functions' similarity analyzed")
 
-    def analyze_function_similarity(self, function_uri: str):
-        best_sim = {'ts_score': -1.0, 'other_function': None}
-        function = self.get_function(function_uri)
+    def analyze_function_similarity(self, function_name, file):
+        logger.info(f"Analyzing similarity for {file}.{function_name}")
+        best_sim = {'ts_score': -1.0, 'similar_function': None}
+        function = self.get_function(file+'.'+function_name)
         tree_1, len_1 = self.parse_ast(function['original_string'])
-        # 预先缓存每个函数的 AST 和树长度
-        ast_cache = {}
-        for func in self.function_metainfo:
+        for uris, func in self.function_metainfo.items():
+            if uris == function['uris']:
+                continue
             tree_2, len_2 = self.parse_ast(func['original_string'])
             ts_score = self.calculate_ast_similarity(tree_1, tree_2, len_1, len_2)
             if ts_score > best_sim['ts_score']:
                 best_sim['ts_score'] = ts_score
-                best_sim['other_function'] = func['name']
+                best_sim['similar_function'] = uris
+        logger.info(f"Similarity analyzed: {best_sim['similar_function']} ({best_sim['ts_score']})")
         return best_sim

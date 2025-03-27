@@ -3,11 +3,12 @@ LANGUAGE_MODE = "cpp"
 LOG_DIR = r"D:\Code\UnitTestGen\logs"
 LLM_LOG_DIR = LOG_DIR + r"\llm_logs"
 
-REPO_PATH = r"D:\Code\UnitTestGen\test_repo"
+# REPO_PATH = r"D:\Code\UnitTestGen\test_repo"
 # REPO_PATH = r"D:\Code\UnitTestGen\mahm3lib"
 # REPO_PATH = r"D:\Code\UnitTestGen\fzy"
+REPO_PATH = r"D:\Code\UnitTestGen\sxiv"
 CUSTOMIZED_TESTCODE_PATH = [
-    r"test"
+    # r"test"
 ]  # relative path
 # EXCEPTE_PATH = [
 #     r"D:\Code\UnitTestGen\mahm3lib\src\unity"
@@ -29,3 +30,6 @@ TESTCASE_ANALYSIS_RESULT_PATH = RESOLVED_METAINFO_PATH + "testcase_analysis_resu
 CONTEXT_ANALYSIS_RESULT_PATH = RESOLVED_METAINFO_PATH + "context_analysis_result.json"
 
 GENERATION_RESULT_PATH = "D:\\Code\\UnitTestGen\\results\\"
+
+REFERENCE_THRESHOLD = 0.8 # 当相似度大于该阈值时，提供参考给大模型
+UNITTEST_FRAMEWORK = "Unity"

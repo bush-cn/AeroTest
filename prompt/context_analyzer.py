@@ -1,4 +1,62 @@
-Prompt_C = """
+Prompt = """
+## Task 
+You are a professional static analysis expert for C code. When given a C function, generate a JSON specification of required testing dependencies.
+Specifically, analyze the input function to identify:
+- Directly called functions (both standard library and user-defined)
+- User Defined Types (UDTs: structs, enums, unions) used in parameters, returns, or variables
+- Global variables accessed (both read and write operations)
+- Macro definitions required for compilation
+
+## Response Format
+Please return the analysis results in the following JSON format:
+```json
+{
+    "functions": [”function_name1”, ”function_name2”, ...],
+    "udts": [”udt_name1”, ”udt_name2”, ...],
+    "global_variables": [”variable_name1”, ”variable_name2”, ...],
+    "macros": [”macro_name1”, ”macro_name2”, ...]
+}
+```
+
+## Examples
+### Input
+void choices_init(struct choices *c, options_t *options) {
+    c->strings = NULL;
+    c->results = NULL;
+
+    c->buffer_size = buffer_size;
+    c->buffer = NULL;
+
+    c->capacity = c->size = 0;
+    choices_resize(c, INITIAL_CHOICE_CAPACITY);
+
+    if (options->workers) {
+        c->worker_count = options->workers;
+    } else {
+        c->worker_count = (int)sysconf(_SC_NPROCESSORS_ONLN);
+    }
+
+    choices_reset_search(c);
+}
+### Output
+```json
+{
+    "functions": ["choices_resize", "choices_reset_search", "sysconf"],
+    "udts": ["struct choices", "options_t"],
+    "global_variables": ["buffer_size"],
+    "macros": ["INITIAL_CHOICE_CAPACITY", "_SC_NPROCESSORS_ONLN"]
+}
+```
+
+## Important Notes
+- Include only types/functions explicitly used in the code
+- Preserve exact type declarations including struct/enum/union keywords
+- Ensure that all dependencies are accurately identified, avoiding any duplication or omission
+- Only return the JSON-formatted data without adding any extra content
+- The results must be based on actual analysis; do not fabricate information.
+"""
+
+Prompt_v1 = """
 ## Task 
 You are a source code analysis specialist. Your task is to analyze the provided function code (C language) and identify the corresponding functions and structs involved in these code. 
 You should only find the relevant functions and structs from the list provided to you.
@@ -33,19 +91,19 @@ This is the function code:
     void choices_init(choices_t *c, options_t *options) {
         c->strings = NULL;
         c->results = NULL;
-    
+
         c->buffer_size = 0;
         c->buffer = NULL;
-    
+
         c->capacity = c->size = 0;
         choices_resize(c, INITIAL_CHOICE_CAPACITY);
-    
+
         if (options->workers) {
             c->worker_count = options->workers;
         } else {
             c->worker_count = (int)sysconf(_SC_NPROCESSORS_ONLN);
         }
-    
+
         choices_reset_search(c);
     }
 ```

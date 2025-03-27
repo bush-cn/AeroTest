@@ -692,22 +692,6 @@ class Function:
         }
 
 
-class FunctionSignature:
-    def __init__(self,
-                 file_path: str = None,
-                 function_name: str = None,
-                 params: List[Dict[str, str]] = None,
-                 return_type: str = None) -> None:
-        self.file_path = file_path
-        self.function_name = function_name
-        self.params = params
-        self.return_type = return_type
-
-    def unique_name(self):
-        return self.file_path + '.' + f'[{self.return_type}]' + self.function_name + \
-            '(' + ','.join([param['type'] for param in self.params]) + ')'
-
-
 class UDT:
     """
     User Defined Type，用户自定义类型，包括结构体、类、枚举
@@ -791,12 +775,14 @@ class GlobalVariable:
     def __init__(self,
                  uris: List[str] = None,
                  name: str = None,
+                 type: str = None,
                  file: str = None,
                  docstring: str = None,
                  original_string: str = None,
                  ):
         self.uris = uris
         self.name = name
+        self.type = type
         self.file = file
         self.docstring = docstring
         self.original_string = original_string
@@ -805,6 +791,7 @@ class GlobalVariable:
         return {
             "uris": self.uris,
             "name": self.name,
+            "type": self.type,
             "file": self.file,
             "docstring": self.docstring,
             "original_string": self.original_string,
