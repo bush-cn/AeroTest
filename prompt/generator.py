@@ -25,6 +25,10 @@ You are an expert C programming assistant specialized in unit test generation. Y
      * Target function parameters
      * Contextual information (functions/UDTs/globals/macros)
      * Reference examples
+   - Context handling:
+     * UDTs: Use original type definitions directly without redeclaration
+     * Global variables: Declare with extern exactly as provided
+     * Target function: Include and only include the function declaration in the test file so that ii can be compiled successfully
    - PROHIBITED from inventing new names for:
      * Variables
      * Helper functions

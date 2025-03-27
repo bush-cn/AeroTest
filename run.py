@@ -26,4 +26,4 @@ if __name__ == "__main__":
     # context_analyzer.execute()
 
     generator = CTestcaseGenerator(llm=llm)
-    generator.generate_testcase("img_init", "image.c",analyze_similarity=False, pre_analyzed=False)
+    generator.generate_testcase("cg_navigate_marked", "commands.c",analyze_similarity=False, pre_analyzed=False)

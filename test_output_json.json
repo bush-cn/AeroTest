@@ -2,14 +2,23 @@
     "type": "translation_unit",
     "children": [
         {
-            "type": "declaration",
+            "type": "type_definition",
             "children": [
                 {
-                    "type": "union_specifier",
+                    "type": "typedef",
+                    "children": []
+                },
+                {
+                    "type": "struct_specifier",
                     "children": [
                         {
-                            "type": "union",
+                            "type": "struct",
                             "children": []
+                        },
+                        {
+                            "type": "type_identifier",
+                            "children": [],
+                            "field": "name"
                         },
                         {
                             "type": "field_declaration_list",
@@ -27,27 +36,8 @@
                                             "field": "type"
                                         },
                                         {
-                                            "type": "array_declarator",
-                                            "children": [
-                                                {
-                                                    "type": "field_identifier",
-                                                    "children": [],
-                                                    "field": "declarator"
-                                                },
-                                                {
-                                                    "type": "[",
-                                                    "children": []
-                                                },
-                                                {
-                                                    "type": "number_literal",
-                                                    "children": [],
-                                                    "field": "size"
-                                                },
-                                                {
-                                                    "type": "]",
-                                                    "children": []
-                                                }
-                                            ],
+                                            "type": "field_identifier",
+                                            "children": [],
                                             "field": "declarator"
                                         },
                                         {
@@ -57,25 +47,11 @@
                                     ]
                                 },
                                 {
-                                    "type": "comment",
-                                    "children": []
-                                },
-                                {
                                     "type": "field_declaration",
                                     "children": [
                                         {
-                                            "type": "struct_specifier",
-                                            "children": [
-                                                {
-                                                    "type": "struct",
-                                                    "children": []
-                                                },
-                                                {
-                                                    "type": "type_identifier",
-                                                    "children": [],
-                                                    "field": "name"
-                                                }
-                                            ],
+                                            "type": "primitive_type",
+                                            "children": [],
                                             "field": "type"
                                         },
                                         {
@@ -100,7 +76,87 @@
                     "field": "type"
                 },
                 {
-                    "type": "identifier",
+                    "type": "type_identifier",
+                    "children": [],
+                    "field": "declarator"
+                },
+                {
+                    "type": ";",
+                    "children": []
+                }
+            ]
+        },
+        {
+            "type": "type_definition",
+            "children": [
+                {
+                    "type": "typedef",
+                    "children": []
+                },
+                {
+                    "type": "struct_specifier",
+                    "children": [
+                        {
+                            "type": "struct",
+                            "children": []
+                        },
+                        {
+                            "type": "field_declaration_list",
+                            "children": [
+                                {
+                                    "type": "{",
+                                    "children": []
+                                },
+                                {
+                                    "type": "field_declaration",
+                                    "children": [
+                                        {
+                                            "type": "primitive_type",
+                                            "children": [],
+                                            "field": "type"
+                                        },
+                                        {
+                                            "type": "field_identifier",
+                                            "children": [],
+                                            "field": "declarator"
+                                        },
+                                        {
+                                            "type": ";",
+                                            "children": []
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "field_declaration",
+                                    "children": [
+                                        {
+                                            "type": "primitive_type",
+                                            "children": [],
+                                            "field": "type"
+                                        },
+                                        {
+                                            "type": "field_identifier",
+                                            "children": [],
+                                            "field": "declarator"
+                                        },
+                                        {
+                                            "type": ";",
+                                            "children": []
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "}",
+                                    "children": []
+                                }
+                            ],
+                            "field": "body"
+                        }
+                    ],
+                    "field": "type"
+                },
+                {
+                    "type": "type_identifier",
                     "children": [],
                     "field": "declarator"
                 },

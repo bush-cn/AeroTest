@@ -111,7 +111,7 @@ class CTestcaseGenerator(Analyzer):
         response = self.call_llm(system_prompt=self.system_prompt, user_input=str(llm_input))
         result = self.extract_code(response)
         path = os.path.dirname(function['file'])
-        file_name = os.path.basename(function['file']).strip('.c')
+        file_name = os.path.basename(function['file']).removesuffix('.c')
         with open(os.path.join(REPO_PATH, path, f"test_{file_name}_{function['name']}.c"), 'w', encoding='utf-8') as f:
             f.write(result)
         logger.info(f"Generated testcase for {function['name']}.")

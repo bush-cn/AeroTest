@@ -76,7 +76,7 @@ class CMetaInfoBuilder:
                     uris=udt['name'],   # UDT name is unique among all files
                     name=udt['name'],
                     file=file_path,
-                    # fields=struct['attributes']['fields'],
+                    inner_types=udt['inner_types'] if 'inner_types' in udt else None,
                     udt_docstring=udt['docstring'],
                     original_string=udt['original_string'],
                     typedef=udt['typedef'] if 'typedef' in udt else None,

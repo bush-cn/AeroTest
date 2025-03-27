@@ -700,14 +700,14 @@ class UDT:
                  uris: List[str] = None,
                  name: str = None,
                  file: str = None,
-                 # fields: List[Dict] = None,
+                 inner_types: List[Dict] = None,
                  udt_docstring: str = None,
                  original_string: str = None,
                  typedef: str = None):
         self.uris = uris
         self.name = name
         self.file = file
-        # self.fields = fields
+        self.inner_types = inner_types
         self.udt_docstring = udt_docstring
         self.original_string = original_string
         self.typedef = typedef
@@ -717,7 +717,7 @@ class UDT:
             "uris": self.uris,
             "name": self.name,
             "file": self.file,
-            # "fields": self.fields,
+            "inner_types": self.inner_types,
             "docstring": self.udt_docstring,
             "original_string": self.original_string,
             "typedef": self.typedef

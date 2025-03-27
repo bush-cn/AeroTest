@@ -49,7 +49,7 @@ class MetaInfo:
         返回值：类型的元信息
 
         只有UDT是一对一不存在重名。若查找到typedef，递归查找其真实类型。
-        且查找过程中的define链也需要保存，最终将全部的源字符串提供给LLM。
+        查找过程中的define链以及内部类型也需要保存，最终将全部的源字符串提供给LLM。
         若查找不到返回空列表。
         """
         results = []
@@ -58,8 +58,11 @@ class MetaInfo:
             results.append(result)
         while result is not None and result['typedef'] and result['typedef'] in self.udt_metainfo:
             result = self.udt_metainfo.get(result['typedef'])
-            if result is not None:
-                results.append(result)
+            results.append(result)
+        # 最后当前result是真实类型，递归查找其内部类型
+        if result is not None and result['inner_types']:
+            for inner_type in result['inner_types']:
+                results.extend(self.get_udt(inner_type))
         return results
 
     def get_global_variable(self, *args):

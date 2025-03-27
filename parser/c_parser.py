@@ -60,14 +60,17 @@ class CParser(LanguageParser):
     def class_nodes(self):
         """
         返回所有用户定义类型（UDTs）节点
+        匿名struct、union、enum不计入，且inner_types字段处理在对应的typedef中
+        而具名的struct、union、enum则计入，与typedef独立为两个节点
         """
         nodes = []
         try:
             all_nodes = []
             traverse_type(self.tree.root_node, all_nodes, self._user_defined_types)
-            # 过滤掉没有 body 的节点
+            # 过滤掉没有 body 的标识符节点，以及没有 name
             nodes = [node for node in all_nodes
-                     if node.type == "type_definition" or node.child_by_field_name("body") is not None]
+                     if node.type == "type_definition" or (
+                             node.child_by_field_name("body") is not None and node.child_by_field_name("name") is not None)]
         except RecursionError:
             pass
         return nodes
@@ -217,39 +220,47 @@ class CParser(LanguageParser):
             typedef_name_node = udt_node.child_by_field_name("declarator")
             result['name'] = self.span_select(typedef_name_node, indent=False) if typedef_name_node else ""
             typedef_original_type_node = udt_node.child_by_field_name("type")
-            result['typedef'] = self.span_select(typedef_original_type_node, indent=False)\
+            result['typedef'] = self.span_select(typedef_original_type_node, indent=False) \
                 if typedef_original_type_node else ""
-            return result
+            # 若为具名UDT，则直接返回，因为具名UDT会被再解析一遍
+            if typedef_original_type_node.child_by_field_name("name") is not None:
+                return result
+            # 若为匿名UDT，匿名UDT不解析，与此typedef合并
+            else:
+                udt_node = typedef_original_type_node
 
         name_node = udt_node.child_by_field_name("name")
-        udt_name = self.span_select(name_node, indent=False) if name_node else ""
-        if udt_node.type == "struct_specifier":
-            udt_name = "struct " + udt_name
-        elif udt_node.type == "enum_specifier":
-            udt_name = "enum " + udt_name
-        elif udt_node.type == "union_specifier":
-            udt_name = "union " + udt_name
-        result["name"] = udt_name.strip()
+        if name_node is not None:
+            udt_name = self.span_select(name_node, indent=False)
+            if udt_node.type == "struct_specifier":
+                udt_name = "struct " + udt_name
+            elif udt_node.type == "enum_specifier":
+                udt_name = "enum " + udt_name
+            elif udt_node.type == "union_specifier":
+                udt_name = "union " + udt_name
+            result["name"] = udt_name.strip()
+        # 否则是匿名UDT，上面已将name字符置为typedef值
 
-        # 这下面的感觉都不用记录了，直接将源码丢给LLM处理
-        # body_node = udt_node.child_by_field_name("body")
-        # result["body"] = self.span_select(body_node, indent=False) if body_node else ""
-        # fields = []
-        # if body_node and body_node.children:
-        #     for field in body_node.children:
-        #         if field.type != "field_declaration":
-        #             continue
-        #         field_dict = {
-        #             "original_string": self.span_select(field, indent=False),
-        #             "annotations": []
-        #         }
-        #         comment_node = self._get_docstring_before(field, body_node)
-        #         field_dict["docstring"] = (
-        #             strip_c_style_comment_delimiters(self.span_select(comment_node, indent=False)).strip()
-        #             if comment_node else ""
-        #         )
-        #         type_node = field.child_by_field_name("type")
-        #         field_dict["type"] = self.span_select(type_node, indent=False) if type_node else ""
+        body_node = udt_node.child_by_field_name("body")
+        fields = []
+        if body_node and body_node.children:
+            for field in body_node.children:
+                if field.type != "field_declaration":
+                    continue
+                # field_dict = {
+                #                 "original_string": self.span_select(field, indent=False),
+                #                 "annotations": []
+                # }
+                # comment_node = self._get_docstring_before(field, body_node)
+                # field_dict["docstring"] = (
+                #     strip_c_style_comment_delimiters(self.span_select(comment_node, indent=False)).strip()
+                #     if comment_node else ""
+                # )
+                type_node = field.child_by_field_name("type")
+                type_name = self.span_select(type_node, indent=False) if type_node else ""
+                fields.append(type_name)
+                # field_dict["type"] = self.span_select(type_node, indent=False) if type_node else ""
+
         #         if field.children and field.children[0].type == "storage_class_specifier":
         #             field_dict["annotations"].append(self.span_select(field.children[0], indent=False))
         #         try:
@@ -269,6 +280,7 @@ class CParser(LanguageParser):
         #         if child.type in self._struct_types:
         #             nested_structs.append(self._parse_struct_node(child))
         # result["structs"] = nested_structs
+        result["inner_types"] = fields
         return result
 
     # --- 实现抽象方法和属性 ---

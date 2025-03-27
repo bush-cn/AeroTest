@@ -1,4 +1,9 @@
-union {
-	char d[4096]; /* aligned buffer */
-	struct inotify_event e;
-} buf;
+typedef struct s{
+    int a;
+    int b;
+} S;
+
+typedef struct {
+    int a;
+    int b;
+} S2;
