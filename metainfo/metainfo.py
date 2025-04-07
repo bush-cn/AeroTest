@@ -2,7 +2,7 @@ from typing import List
 
 from metainfo.c_metainfo_builder import CMetaInfoBuilder
 from utils.data_processor import load_json
-import config
+from config import global_config
 from utils.logger import logger
 
 
@@ -10,11 +10,11 @@ class MetaInfo:
     """
     暂时没有维护之前的Java和Python适配了，只保留处理C的部分代码，后面如需合并可简单修改即可。
     """
-    udt_metainfo_path = config.UDT_METAINFO_PATH
-    function_metainfo_path = config.FUNCTION_METAINFO_PATH
-    testcase_metainfo_path = config.TESTCASE_METAINFO_PATH
-    global_variable_metainfo = config.GLOBAL_VARIABLE_METAINFO_PATH
-    language_mode = config.LANGUAGE_MODE
+    udt_metainfo_path = global_config['UDT_METAINFO_PATH']
+    function_metainfo_path = global_config['FUNCTION_METAINFO_PATH']
+    testcase_metainfo_path = global_config['TESTCASE_METAINFO_PATH']
+    global_variable_metainfo = global_config['GLOBAL_VARIABLE_METAINFO_PATH']
+    language_mode = global_config['LANGUAGE_MODE']
 
     def __init__(self) -> None:
         self.testcase_metainfo = load_json(self.testcase_metainfo_path)

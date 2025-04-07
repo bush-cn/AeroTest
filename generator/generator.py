@@ -5,18 +5,7 @@ from analysis.context_analyzer import ContextAnalyzer
 from analysis.testcase_analyzer import TestCaseAnalyzer
 from analysis.repo_analyzer import RepoAnalyzer
 from llm.llm import LLM
-from config import (
-    TESTCASE_ANALYSIS_RESULT_PATH,
-    CONTEXT_ANALYSIS_RESULT_PATH,
-    FUNCTION_SIMILARITY_PATH,
-    ALL_METAINFO_PATH,
-    FUNCTION_METAINFO_PATH,
-    UDT_METAINFO_PATH,
-    GLOBAL_VARIABLE_METAINFO_PATH,
-    TESTCASE_METAINFO_PATH,
-    REPO_PATH,
-    REFERENCE_THRESHOLD,
-)
+from config import global_config
 from utils.decorators import log_llm_interaction
 from utils.logger import logger
 from utils.data_processor import load_json
@@ -41,15 +30,15 @@ class CTestcaseGenerator(Analyzer):
         Analyzer.__init__(self, llm=llm)
         self.llm = llm
         self.system_prompt = system_prompt
-        self.all_metainfo = load_json(ALL_METAINFO_PATH)
-        self.function_metainfo = load_json(FUNCTION_METAINFO_PATH)
-        self.udt_metainfo = load_json(UDT_METAINFO_PATH)
-        self.global_variable_metainfo = load_json(GLOBAL_VARIABLE_METAINFO_PATH)
-        self.testcase_metainfo = load_json(TESTCASE_METAINFO_PATH)
+        self.all_metainfo = load_json(global_config['ALL_METAINFO_PATH'])
+        self.function_metainfo = load_json(global_config['FUNCTION_METAINFO_PATH'])
+        self.udt_metainfo = load_json(global_config['UDT_METAINFO_PATH'])
+        self.global_variable_metainfo = load_json(global_config['GLOBAL_VARIABLE_METAINFO_PATH'])
+        self.testcase_metainfo = load_json(global_config['TESTCASE_METAINFO_PATH'])
 
-        self.context_analysis = load_json(CONTEXT_ANALYSIS_RESULT_PATH) if pre_analyzed else None
-        self.testcase_analysis = load_json(TESTCASE_ANALYSIS_RESULT_PATH) if pre_analyzed else None
-        self.similar_analysis = load_json(FUNCTION_SIMILARITY_PATH) if pre_analyzed else None
+        self.context_analysis = load_json(global_config['CONTEXT_ANALYSIS_RESULT_PATH']) if pre_analyzed else None
+        self.testcase_analysis = load_json(global_config['TESTCASE_ANALYSIS_RESULT_PATH']) if pre_analyzed else None
+        self.similar_analysis = load_json(global_config['FUNCTION_SIMILARITY_PATH']) if pre_analyzed else None
 
     @log_llm_interaction("TestcaseGenerator")
     def call_llm(self, system_prompt, user_input) -> str:
@@ -69,10 +58,10 @@ class CTestcaseGenerator(Analyzer):
         similar = None
         testcase_analysis = None
         if pre_analyzed:
-            context_analysis = load_json(CONTEXT_ANALYSIS_RESULT_PATH)
+            context_analysis = load_json(global_config['CONTEXT_ANALYSIS_RESULT_PATH'])
             if analyze_similarity:
-                similar = load_json(FUNCTION_SIMILARITY_PATH)
-                testcase_analysis = load_json(TESTCASE_ANALYSIS_RESULT_PATH)
+                similar = load_json(global_config['FUNCTION_SIMILARITY_PATH'])
+                testcase_analysis = load_json(global_config['TESTCASE_ANALYSIS_RESULT_PATH'])
         else:
             context_analysis = ContextAnalyzer(llm=self.llm).analyze_function_context(function_name, file)
             if analyze_similarity:
@@ -99,7 +88,7 @@ class CTestcaseGenerator(Analyzer):
             context_functions='\n'.join([result for f in context['functions']
                                          if (result := self._get_function_string(f, function['file'])) is not None]),
             context_udts='\n'.join([self._get_udt_string(u) for u in context['udts']])
-                         + global_variable_udts_string,
+                         + '\n' + global_variable_udts_string,
             context_global_variables='\n'.join([result for g in context['global_variables']
                                                 if (result := self._get_global_variable_string(g, function[
                     'file'])) is not None]),
@@ -112,7 +101,7 @@ class CTestcaseGenerator(Analyzer):
         result = self.extract_code(response)
         path = os.path.dirname(function['file'])
         file_name = os.path.basename(function['file']).removesuffix('.c')
-        with open(os.path.join(REPO_PATH, path, f"test_{file_name}_{function['name']}.c"), 'w', encoding='utf-8') as f:
+        with open(os.path.join(global_config['REPO_PATH'], path, f"test_{file_name}_{function['name']}.c"), 'w', encoding='utf-8') as f:
             f.write(result)
         logger.info(f"Generated testcase for {function['name']}.")
 
@@ -164,7 +153,7 @@ class CTestcaseGenerator(Analyzer):
         if similar is None or testcase_analysis is None:
             return None
 
-        if similar['ts_score'] < REFERENCE_THRESHOLD:
+        if similar['ts_score'] < global_config['REFERENCE_THRESHOLD']:
             return None
 
         result = "The most similar function:\n"
@@ -202,7 +191,7 @@ class LLMInput:
 
     def __str__(self) -> str:
         str = f"""Target Function to be tested: \n{self.focal_function}
-Its includes info: \n{self.includes}
+Its header files and macro definitions you must all include in test file: \n{self.includes}
 ---
 Context Information you may need:
 1. Source code of involved function: \n{self.context_functions}

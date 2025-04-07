@@ -4,7 +4,7 @@ from parser.tree_sitter_query_parser import extract_global_variables
 from common.enum import LANGUAGE_TO_SUFFIX, LanguageEnum
 from source_parser.utils import static_hash
 from utils.data_processor import save_json
-from config import EXCEPTE_PATH, REPO_PATH, ALL_METAINFO_PATH
+from config import global_config
 from utils.logger import logger
 
 
@@ -38,7 +38,7 @@ class Processor:
             # 跳过用户配置文件中指定的目录
             new_dirs = []
             for d in dirs:
-                if os.path.join(root_abs, d) not in EXCEPTE_PATH:
+                if os.path.join(root_abs, d) not in global_config['EXCEPTE_PATH']:
                     new_dirs.append(d)
             dirs[:] = new_dirs
 
@@ -96,5 +96,5 @@ def run_source_parse(repo_path: str, language: LanguageEnum, parser: LanguagePar
     # 将结果转为以文件名为key的字典
     results_dict = {file['relative_path']: file for file in results}
 
-    save_json(ALL_METAINFO_PATH, results_dict)
+    save_json(global_config['ALL_METAINFO_PATH'], results_dict)
     logger.info("repo parsed successfully!")

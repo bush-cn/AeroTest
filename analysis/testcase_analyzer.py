@@ -1,7 +1,7 @@
 from llm.llm import LLM
 from utils.decorators import log_llm_interaction
 from analysis.analyzer import Analyzer
-from config import TESTCASE_ANALYSIS_RESULT_PATH, TESTCASE_METAINFO_PATH
+from config import global_config
 from utils.data_processor import load_json, save_json
 from utils.logger import logger
 from prompt.testcase_analyzer import Prompt_C
@@ -11,12 +11,12 @@ class TestCaseAnalyzer(Analyzer):
     def __init__(self,
                  llm: LLM = None,
                  system_prompt: str = Prompt_C,
-                 testcase_analysis_result_path: str = TESTCASE_ANALYSIS_RESULT_PATH,
+                 testcase_analysis_result_path: str = global_config['TESTCASE_ANALYSIS_RESULT_PATH'],
                  ):
         Analyzer.__init__(self, llm=llm)
         self.llm = llm
         self.system_prompt = system_prompt
-        self.testcase_metainfo = load_json(TESTCASE_METAINFO_PATH)
+        self.testcase_metainfo = load_json(global_config['TESTCASE_METAINFO_PATH'])
         self.testcase_analysis_result_path = testcase_analysis_result_path
 
     @log_llm_interaction("TestCaseAnalyzer")

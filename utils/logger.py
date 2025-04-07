@@ -6,7 +6,7 @@ from config import LOG_DIR
 
 
 # 创建一个日志器
-logger = logging.getLogger('repo_parse')
+logger = logging.getLogger('AeroTest')
 logger.setLevel(logging.DEBUG)  # 设置日志级别
 
 # 创建一个日志文件处理器

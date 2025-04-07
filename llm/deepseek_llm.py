@@ -8,8 +8,8 @@ from llm.llm import LLM
 load_dotenv()
 
 # DEEPSEEK_MODEL = "deepseek-v3-241226"
+# DEEPSEEK_MODEL = "deepseek-r1"
 DEEPSEEK_MODEL = "deepseek-v3"
-
 
 class DeepSeekLLM(LLM):
     def __init__(self, api_key=None,
@@ -40,7 +40,8 @@ class DeepSeekLLM(LLM):
 
         return self._process_stream(response_stream)
 
-    def chat_with_history(self, user_input, system_prompt=None, model=DEEPSEEK_MODEL, max_tokens=4096, temperature=0, stream=True):
+    def chat_with_history(self, user_input, system_prompt=None, model=DEEPSEEK_MODEL, max_tokens=4096, temperature=0,
+                          stream=True):
         if system_prompt is None:
             assert self.history, "system_prompt must be provided for the first message"
         else:
@@ -67,11 +68,28 @@ class DeepSeekLLM(LLM):
     @staticmethod
     def _process_stream(stream):
         full_response = ""
+        is_answering = False
         for chunk in stream:
-            # if len(chunk.choices) > 0:
-            content = chunk.choices[0].delta.content or ""
-            print(content, end="", flush=True)
-            full_response += content
+            # content = chunk.choices[0].delta.content or ""
+            # print(content, end="", flush=True)
+            # full_response += content
+            if not chunk.choices:
+                print("\nUsage:")
+                print(chunk.usage)
+            else:
+                delta = chunk.choices[0].delta
+                # 打印思考过程
+                if hasattr(delta, 'reasoning_content') and delta.reasoning_content is not None:
+                    print(delta.reasoning_content, end='', flush=True)
+                    # reasoning_content += delta.reasoning_content
+                else:
+                    # 开始回复
+                    if delta.content != "" and is_answering is False:
+                        print("\n" + "=" * 20 + "Response" + "=" * 20 + "\n")
+                        is_answering = True
+                    # 打印回复过程
+                    print(delta.content, end='', flush=True)
+                    full_response += delta.content
         print("\n")
         return full_response
 

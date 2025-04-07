@@ -6,14 +6,14 @@ from llm.llm import LLM
 from analysis.analyzer import Analyzer
 from utils.data_processor import save_json, load_json
 from utils.logger import logger
-from config import FUNCTION_SIMILARITY_PATH, FUNCTION_METAINFO_PATH
+from config import global_config
 from apted import APTED, PerEditOperationConfig
 
 class RepoAnalyzer(Analyzer):
     def __init__(self,
                  llm: LLM = None,
-                 function_similarity_path: str = FUNCTION_SIMILARITY_PATH,
-                 function_metainfo_path: str = FUNCTION_METAINFO_PATH
+                 function_similarity_path: str = global_config['FUNCTION_SIMILARITY_PATH'],
+                 function_metainfo_path: str = global_config['FUNCTION_METAINFO_PATH']
                  ):
         Analyzer.__init__(self, llm=llm)
         self.function_similarity_path = function_similarity_path

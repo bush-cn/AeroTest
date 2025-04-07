@@ -3,22 +3,14 @@ from typing import Dict, List
 from utils.data_processor import load_json, save_json
 from utils.java import get_java_standard_method_name
 from utils.logger import logger
-from config import (
-    ALL_METAINFO_PATH,
-    RESOLVED_METAINFO_PATH,
-    FUNCTION_METAINFO_PATH,
-    UDT_METAINFO_PATH,
-    TESTCASE_METAINFO_PATH,
-    GLOBAL_VARIABLE_METAINFO_PATH,
-    CUSTOMIZED_TESTCODE_PATH,
-)
+from config import global_config
 from metainfo.model import Function, UDT, CTestcase, GlobalVariable
 
 
 class CMetaInfoBuilder:
 
-    def __init__(self, metainfo_json_path: str = ALL_METAINFO_PATH,
-                 resolved_metainfo_path: str = RESOLVED_METAINFO_PATH):
+    def __init__(self, metainfo_json_path: str = global_config['ALL_METAINFO_PATH'],
+                 resolved_metainfo_path: str = global_config['RESOLVED_METAINFO_PATH']):
         self.metainfo_json_path = metainfo_json_path
         self.metainfo = load_json(self.metainfo_json_path)
         self.resolved_metainfo_path = resolved_metainfo_path
@@ -30,10 +22,10 @@ class CMetaInfoBuilder:
 
     def save(self):
         path_to_data = {
-            FUNCTION_METAINFO_PATH: self.data_to_dict(self.functions),
-            TESTCASE_METAINFO_PATH: self.data_to_dict(self.testcases),
-            UDT_METAINFO_PATH: self.data_to_dict(self.udts),
-            GLOBAL_VARIABLE_METAINFO_PATH: self.data_to_dict(self.global_variables)
+            global_config['FUNCTION_METAINFO_PATH']: self.data_to_dict(self.functions),
+            global_config['TESTCASE_METAINFO_PATH']: self.data_to_dict(self.testcases),
+            global_config['UDT_METAINFO_PATH']: self.data_to_dict(self.udts),
+            global_config['GLOBAL_VARIABLE_METAINFO_PATH']: self.data_to_dict(self.global_variables)
         }
 
         for path, data in path_to_data.items():
@@ -54,7 +46,7 @@ class CMetaInfoBuilder:
         """
         Check if a file is a testcase file
         """
-        for path in CUSTOMIZED_TESTCODE_PATH:
+        for path in global_config['CUSTOMIZED_TESTCODE_PATH']:
             if path in file['relative_path']:
                 return True
 

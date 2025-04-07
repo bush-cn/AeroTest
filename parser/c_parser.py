@@ -24,7 +24,6 @@ class CParser(LanguageParser):
     _import_types = (
         "preproc_include",
         "preproc_def",
-        "preproc_call",
     )
     _docstring_types = ("comment",)
     _include_patterns = "*.h", "*.c"

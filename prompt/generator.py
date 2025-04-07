@@ -1,4 +1,4 @@
-from config import UNITTEST_FRAMEWORK
+from config import global_config
 
 Prompt = f"""
 You are an expert C programming assistant specialized in unit test generation. Your task is to generate complete, production-quality test cases for a given C function based on the provided context. Follow these guidelines:
@@ -14,7 +14,9 @@ You are an expert C programming assistant specialized in unit test generation. Y
    - Optional reference examples (similar function + its test case)
 
 2. **Output Requirements:**
-   - Generate a complete .c file using the {UNITTEST_FRAMEWORK} framework
+   - Generate a complete .c file using the Unity framework. 
+     Always include the necessary setUp() and tearDown() functions, even if they are empty.
+     Make sure that each test case is encapsulated in a RUN_TEST() call, and that the main function properly initializes and ends the Unity test suite using UNITY_BEGIN() and UNITY_END().
    - Create test cases covering:
      * Normal operation scenarios
      * Edge cases or boundary conditions
@@ -27,7 +29,7 @@ You are an expert C programming assistant specialized in unit test generation. Y
      * Reference examples
    - Context handling:
      * UDTs: Use original type definitions directly without redeclaration
-     * Global variables: Declare with extern exactly as provided
+     * Global variables: Declare with 'extern' keyword (e.g., given 'const t *foo = (void *)0x1234;', use 'extern const t *foo;')
      * Target function: Include and only include the function declaration in the test file so that ii can be compiled successfully
    - PROHIBITED from inventing new names for:
      * Variables
@@ -57,7 +59,9 @@ You are an expert C programming assistant specialized in unit test generation. Y
    - Manage global state reset between tests
    - Account for platform-specific behavior if headers indicate
    - Generate test values using both static and dynamic methods
-
+   - Note: When testing void functions with Unity, DO NOT wrap void function with assertion (such as 'TEST_ASSERT_EQUAL(0, void_function(arg)' or 'TEST_ASSERT_NULL(void_function(arg))'). 
+     Focus on verifying side effects (e.g., changes to variables or struct fields), or just pass the test if no side effects are present after calling the void function.
+     
 Produce only the complete test implementation code with minimal explanation. Verify the generated code can compile with standard C toolchains (C99 or later).
 """
 

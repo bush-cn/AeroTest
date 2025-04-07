@@ -3,10 +3,7 @@ from llm.llm import LLM
 from utils.data_processor import load_json, save_json
 from utils.decorators import log_llm_interaction
 from utils.logger import logger
-from config import (
-    FUNCTION_METAINFO_PATH,
-    CONTEXT_ANALYSIS_RESULT_PATH,
-)
+from config import global_config
 from prompt.context_analyzer import Prompt
 
 
@@ -17,12 +14,12 @@ class ContextAnalyzer(Analyzer):
     def __init__(self,
                  llm: LLM = None,
                  system_prompt: str = Prompt,
-                 context_analysis_result_path: str = CONTEXT_ANALYSIS_RESULT_PATH,
+                 context_analysis_result_path: str = global_config['CONTEXT_ANALYSIS_RESULT_PATH'],
                  ):
         Analyzer.__init__(self, llm=llm)
         self.llm = llm
         self.system_prompt = system_prompt
-        self.function_metainfo = load_json(FUNCTION_METAINFO_PATH)
+        self.function_metainfo = load_json(global_config['FUNCTION_METAINFO_PATH'])
         self.context_analysis_result = None
         self.context_analysis_result_path = context_analysis_result_path
 
