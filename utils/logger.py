@@ -2,7 +2,7 @@ import logging
 import os
 from datetime import datetime
 
-from config import LOG_DIR
+from config import global_config
 
 
 # 创建一个日志器
@@ -10,7 +10,7 @@ logger = logging.getLogger('AeroTest')
 logger.setLevel(logging.DEBUG)  # 设置日志级别
 
 # 创建一个日志文件处理器
-log_dir = LOG_DIR
+log_dir = global_config['LOG_DIR']
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 

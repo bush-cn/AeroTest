@@ -1,5 +1,7 @@
 # AeroTest航宇智测
 
+[前端仓库](https://github.com/pizza2k/unitTest.git)
+
 ## 使用
 首先安装依赖：
 ```bash
@@ -24,4 +26,4 @@ python run.py <fucntion_name> <file_name> [-r]
 ```bash
 python app.py 
 ```
-然后打开`localhost:8080`。
+然后按提示打开`localhost:5000`进入可视化界面。

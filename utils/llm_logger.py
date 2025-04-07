@@ -5,7 +5,7 @@ raw intput to LLM and the output from LLM, helping us to debug and analyze.
 import os
 import datetime
 import threading
-from config import LLM_LOG_DIR
+from config import global_config
 
 
 class SingletonMeta(type):
@@ -42,4 +42,4 @@ class LLMLogger(metaclass=SingletonMeta):
             log_file.write(response + "\n\n")
 
 
-llm_logger = LLMLogger(log_dir=LLM_LOG_DIR)
+llm_logger = LLMLogger(log_dir=global_config['LLM_LOG_DIR'])
