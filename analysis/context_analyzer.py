@@ -51,6 +51,8 @@ class ContextAnalyzer(Analyzer):
             full_response = self.call_llm(system_prompt=self.system_prompt, user_input=original_string)
             resp_dict = self.extract(full_response)
 
+            save_json(file_path=self.context_analysis_result_path, data={function['uris']: resp_dict})
+
             logger.info(f"Analyze function {function_name} finished")
             return resp_dict
         except Exception as e:

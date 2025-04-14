@@ -97,5 +97,9 @@ class RepoAnalyzer(Analyzer):
             if ts_score > best_sim['ts_score']:
                 best_sim['ts_score'] = ts_score
                 best_sim['similar_function'] = uris
+
+        save_json(
+            file_path=self.function_similarity_path,
+            data={function['uris']: best_sim})
         logger.info(f"Similarity analyzed: {best_sim['similar_function']} ({best_sim['ts_score']})")
         return best_sim

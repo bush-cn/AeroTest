@@ -3,6 +3,7 @@ import re
 import sys
 
 from config import global_config
+from utils.data_processor import load_json
 
 from flask import Flask, request, Response, send_from_directory, jsonify
 import subprocess
@@ -80,6 +81,77 @@ def get_config():
 
     return jsonify(global_config)
 
+@app.route("/all_metainfo", methods=["GET"])
+def get_all_metainfo():
+    if not os.path.exists(global_config["ALL_METAINFO_PATH"]):
+        return jsonify({"error": "all_metainfo.json not found"}), 404
+
+    data = load_json(global_config["ALL_METAINFO_PATH"])
+
+    return jsonify(data)
+
+@app.route("/testcase_metainfo", methods=["GET"])
+def get_testcase_metainfo():
+    if not os.path.exists(global_config["TESTCASE_METAINFO_PATH"]):
+        return jsonify({"error": "testcase_metainfo.json not found"}), 404
+
+    data = load_json(global_config["TESTCASE_METAINFO_PATH"])
+
+    return jsonify(data)
+
+@app.route("/function_metainfo", methods=["GET"])
+def get_function_metainfo():
+    if not os.path.exists(global_config["FUNCTION_METAINFO_PATH"]):
+        return jsonify({"error": "function_metainfo.json not found"}), 404
+
+    data = load_json(global_config["FUNCTION_METAINFO_PATH"])
+
+    return jsonify(data)
+
+@app.route("/udt_metainfo", methods=["GET"])
+def get_udt_metainfo():
+    if not os.path.exists(global_config["UDT_METAINFO_PATH"]):
+        return jsonify({"error": "udt_metainfo.json not found"}), 404
+
+    data = load_json(global_config["UDT_METAINFO_PATH"])
+
+    return jsonify(data)
+
+@app.route("/global_variable_metainfo", methods=["GET"])
+def get_global_variable_metainfo():
+    if not os.path.exists(global_config["GLOBAL_VARIABLE_METAINFO_PATH"]):
+        return jsonify({"error": "global_variable_metainfo.json not found"}), 404
+
+    data = load_json(global_config["GLOBAL_VARIABLE_METAINFO_PATH"])
+
+    return jsonify(data)
+
+@app.route("/function_similarity", methods=["GET"])
+def get_function_similarity():
+    if not os.path.exists(global_config["FUNCTION_SIMILARITY_PATH"]):
+        return jsonify({"error": "function_similarity.json not found"}), 404
+
+    data = load_json(global_config["FUNCTION_SIMILARITY_PATH"])
+
+    return jsonify(data)
+
+@app.route("/testcase_analysis_result", methods=["GET"])
+def get_testcase_analysis_result():
+    if not os.path.exists(global_config["TESTCASE_ANALYSIS_RESULT_PATH"]):
+        return jsonify({"error": "testcase_analysis_result.json not found"}), 404
+
+    data = load_json(global_config["TESTCASE_ANALYSIS_RESULT_PATH"])
+
+    return jsonify(data)
+
+@app.route("/context_analysis_result", methods=["GET"])
+def get_context_analysis_result():
+    if not os.path.exists(global_config["CONTEXT_ANALYSIS_RESULT_PATH"]):
+        return jsonify({"error": "context_analysis_result.json not found"}), 404
+
+    data = load_json(global_config["CONTEXT_ANALYSIS_RESULT_PATH"])
+
+    return jsonify(data)
 
 if __name__ == "__main__":
     app.run(debug=True, threaded=True)

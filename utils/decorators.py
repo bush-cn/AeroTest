@@ -9,8 +9,9 @@ def log_llm_interaction(agent_name):
             # Access the parameters
             system_prompt = kwargs.get('system_prompt')
             user_input = kwargs.get('user_input')
-            
-            print("System Prompt:", system_prompt, "\nUser Input:", user_input, "\n")
+
+            # 不输出系统提示词和用户输入
+            # print("System Prompt:", system_prompt, "\nUser Input:", user_input, "\n")
             if system_prompt and user_input:
                 # Log user input
                 llm_logger.log_input(agent_name, user_input)

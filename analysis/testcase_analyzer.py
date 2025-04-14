@@ -50,6 +50,8 @@ class TestCaseAnalyzer(Analyzer):
             resp_dict = self.extract(full_response)
 
             logger.info(f"Analyze testcase {testcase_name} finished")
+
+            save_json(file_path=self.testcase_analysis_result_path, data={testcase['uris']: resp_dict})
             return resp_dict
         except Exception as e:
             logger.exception(f'Analyze testcase {testcase_name} failed: {e}')
