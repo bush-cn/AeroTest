@@ -47,6 +47,7 @@ class ContextAnalyzer(Analyzer):
     def _analyze_function_context(self, function):
         try:
             function_name = function['name']
+            logger.info(f"Analyze function {function_name} start")
             original_string = function['original_string']
             full_response = self.call_llm(system_prompt=self.system_prompt, user_input=original_string)
             resp_dict = self.extract(full_response)

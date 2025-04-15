@@ -25,7 +25,7 @@ class CTestcaseGenerator(Analyzer):
     def __init__(self,
                  llm: LLM,
                  system_prompt: str = Prompt,
-                 pre_analyzed: bool = True,
+                 pre_analyzed: bool = False,
                  ):
         Analyzer.__init__(self, llm=llm)
         self.llm = llm
@@ -74,6 +74,7 @@ class CTestcaseGenerator(Analyzer):
         similar, context_analysis都是以函数uri对应的解析结果
         而testcase_analysis是以全部testcase的结果
         """
+        logger.info(f"Generating testcase for {function['name']}...")
         # 全局变量的UDT也需要加入到context_udts中
         global_variable_udts_string = ""
         for global_variable_name in context['global_variables']:
@@ -103,7 +104,7 @@ class CTestcaseGenerator(Analyzer):
         file_name = os.path.basename(function['file']).removesuffix('.c')
         with open(os.path.join(global_config['REPO_PATH'], path, f"test_{file_name}_{function['name']}.c"), 'w', encoding='utf-8') as f:
             f.write(result)
-        logger.info(f"Generated testcase for {function['name']}.")
+        logger.info(f"Generated testcase for {function['name']} successfully.")
 
     def _get_function_string(self, function_name, file):
         function = self.get_function(function_name, file)

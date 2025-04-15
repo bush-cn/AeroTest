@@ -5,7 +5,9 @@ global_config = {
     "REPO_PATH": "D:\\Code\\UnitTestGen\\sxiv",
     "CUSTOMIZED_TESTCODE_PATH": [],
     "EXCEPTE_PATH": [
-        "D:\\Code\\UnitTestGen\\fzy\\deps"
+        "D:\\Code\\UnitTestGen\\sxiv\\unity.h",
+        "D:\\Code\\UnitTestGen\\sxiv\\unity_internals.h",
+        "D:\\Code\\UnitTestGen\\sxiv\\unity.c"
     ],
     "RESOLVED_METAINFO_PATH": [
         "D:\\Code\\UnitTestGen\\data\\"

@@ -60,4 +60,4 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
     run(args.function_name, args.file_name, args.reference)
-    # run("cg_first", "commands.c", reference=False)
+    # run("img_zoom", "image.c", reference=False)

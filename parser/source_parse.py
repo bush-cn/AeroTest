@@ -29,6 +29,7 @@ class Processor:
         parser = self.parser
         file_suffix = LANGUAGE_TO_SUFFIX[self.language]
 
+        exclude_paths = set(os.path.abspath(p) for p in global_config['EXCEPTE_PATH'])
         for root, dirs, files in os.walk(directory):
             root_abs = os.path.abspath(root)
 
@@ -38,7 +39,8 @@ class Processor:
             # 跳过用户配置文件中指定的目录
             new_dirs = []
             for d in dirs:
-                if os.path.join(root_abs, d) not in global_config['EXCEPTE_PATH']:
+                abs_dir = os.path.join(root_abs, d)
+                if os.path.abspath(abs_dir) not in exclude_paths:
                     new_dirs.append(d)
             dirs[:] = new_dirs
 
@@ -47,6 +49,9 @@ class Processor:
                     continue  # 跳过
 
                 file_path = os.path.join(root, file)
+                abs_file_path = os.path.abspath(file_path)
+                if abs_file_path in exclude_paths:
+                    continue  # 跳过配置中排除的文件
                 relative_path = os.path.relpath(file_path, directory)
 
                 # 新增文件编码检测
